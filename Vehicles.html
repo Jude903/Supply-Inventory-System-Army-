@@ -1,0 +1,978 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Military Inventory System - Vehicles</title>
+    <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+    <script>tailwind.config={theme:{extend:{colors:{primary:'#1a56db',secondary:'#475569'},borderRadius:{'none':'0px','sm':'8px',DEFAULT:'12px','md':'16px','lg':'20px','xl':'24px','2xl':'28px','3xl':'32px','full':'9999px','button':'12px'}}}}</script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.5.0/echarts.min.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        :where([class^="ri-"])::before { content: "\f3c2"; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+        .custom-checkbox {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #cbd5e1;
+            border-radius: 4px;
+            outline: none;
+            cursor: pointer;
+            position: relative;
+        }
+        .custom-checkbox:checked {
+            background-color: #1a56db;
+            border-color: #1a56db;
+        }
+        .custom-checkbox:checked::after {
+            content: '';
+            position: absolute;
+            top: 3px;
+            left: 6px;
+            width: 6px;
+            height: 10px;
+            border: solid white;
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg);
+        }
+        .custom-switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 24px;
+        }
+        .custom-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .switch-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #cbd5e1;
+            transition: .4s;
+            border-radius: 24px;
+        }
+        .switch-slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .switch-slider {
+            background-color: #1a56db;
+        }
+        input:checked + .switch-slider:before {
+            transform: translateX(20px);
+        }
+        .search-input:focus {
+            outline: none;
+        }
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 100%;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            z-index: 10;
+            min-width: 160px;
+        }
+        .dropdown-item {
+            padding: 10px 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .dropdown-item:hover {
+            background-color: #f1f5f9;
+        }
+        #map {
+            height: 400px;
+            border-radius: 12px;
+        }
+    </style>
+</head>
+<body>
+<div class="min-h-screen flex flex-col">
+    <!-- Header -->
+    <header class="bg-white shadow-sm">
+        <div class="flex items-center justify-between px-6 py-4">
+            <div class="flex items-center space-x-2">
+                <div class="w-10 h-10 flex items-center justify-center bg-primary rounded-full">
+                    <i class="ri-shield-line text-white ri-lg"></i>
+                </div>
+                <h1 class="text-2xl font-['Pacifico'] text-gray-800">logo</h1>
+            </div>
+            <div class="flex items-center space-x-6">
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 flex items-center pl-3">
+                        <div class="w-5 h-5 flex items-center justify-center text-gray-400">
+                            <i class="ri-search-line"></i>
+                        </div>
+                    </div>
+                    <input type="text" class="search-input pl-10 pr-4 py-2 w-64 bg-gray-50 border-none rounded-full text-sm" placeholder="Search vehicles...">
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div class="w-8 h-8 flex items-center justify-center text-gray-600 hover:text-primary">
+                        <i class="ri-notification-3-line ri-lg"></i>
+                    </div>
+                    <div class="w-8 h-8 flex items-center justify-center text-gray-600 hover:text-primary">
+                        <i class="ri-settings-3-line ri-lg"></i>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <div class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
+                            <i class="ri-user-line text-gray-600"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-800">Col. James Wilson</p>
+                            <p class="text-xs text-gray-500">Administrator</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <nav class="flex px-6 py-2 border-t border-gray-100">
+            <ul class="flex space-x-8">
+                <li><a href="index.html" class="text-gray-600 hover:text-gray-900 py-2">Dashboard</a></li>
+                <li><a href="Inventory.html" class="text-gray-600 hover:text-gray-900 py-2">Inventory</a></li>
+                <li><a href="Ammunition.html" class="text-gray-600 hover:text-gray-900 py-2">Ammunition</a></li>
+                <li><a href="Vehicles.html" class="text-primary font-medium py-2 border-b-2 border-primary">Vehicles</a></li>
+                <li><a href="Weapons.html" class="text-gray-600 hover:text-gray-900 py-2">Weapons</a></li>
+                <li><a href="personnel.html" class="text-gray-600 hover:text-gray-900 py-2">Personnel</a></li>
+                <li><a href="Reports.html" class="text-gray-600 hover:text-gray-900 py-2">Reports</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    </header>
+    
+    <!-- Main Content -->
+    <main class="flex-1 p-6">
+        <!-- Page Title & Actions -->
+        <div class="mb-6 flex items-center justify-between">
+            <div>
+                <h2 class="text-2xl font-bold text-gray-800">Vehicle Fleet Management</h2>
+                <p class="text-gray-500">Manage and monitor all vehicles in the military fleet</p>
+            </div>
+            <div class="flex items-center space-x-3">
+                <span class="text-sm text-gray-500">Last updated: April 9, 2025 - 08:45 AM</span>
+                <button class="flex items-center space-x-1 bg-white border border-gray-200 px-3 py-2 rounded-button text-sm text-gray-600 hover:bg-gray-50 whitespace-nowrap">
+                    <div class="w-4 h-4 flex items-center justify-center">
+                        <i class="ri-refresh-line"></i>
+                    </div>
+                    <span>Refresh</span>
+                </button>
+                <button class="flex items-center space-x-1 bg-white border border-gray-200 px-3 py-2 rounded-button text-sm text-gray-600 hover:bg-gray-50 whitespace-nowrap">
+                    <div class="w-4 h-4 flex items-center justify-center">
+                        <i class="ri-file-chart-line"></i>
+                    </div>
+                    <span>Generate Report</span>
+                </button>
+                <button class="flex items-center space-x-1 bg-primary px-3 py-2 rounded-button text-sm text-white hover:bg-primary/90 whitespace-nowrap">
+                    <div class="w-4 h-4 flex items-center justify-center">
+                        <i class="ri-add-line"></i>
+                    </div>
+                    <span>Add Vehicle</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Vehicle Statistics Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+            <div class="bg-white rounded shadow-sm p-5">
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <p class="text-gray-500 text-sm">Total Vehicles</p>
+                        <h3 class="text-2xl font-bold text-gray-800">246</h3>
+                    </div>
+                    <div class="w-10 h-10 flex items-center justify-center rounded-full bg-blue-50 text-primary">
+                        <i class="ri-jeep-line ri-lg"></i>
+                    </div>
+                </div>
+                <div class="flex items-center">
+                    <div class="w-4 h-4 flex items-center justify-center text-green-500">
+                        <i class="ri-arrow-up-line"></i>
+                    </div>
+                    <span class="text-green-500 text-sm font-medium">4.5%</span>
+                    <span class="text-gray-500 text-sm ml-1">from last month</span>
+                </div>
+            </div>
+            <div class="bg-white rounded shadow-sm p-5">
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <p class="text-gray-500 text-sm">Operational</p>
+                        <h3 class="text-2xl font-bold text-gray-800">198</h3>
+                    </div>
+                    <div class="w-10 h-10 flex items-center justify-center rounded-full bg-green-50 text-green-600">
+                        <i class="ri-check-line ri-lg"></i>
+                    </div>
+                </div>
+                <div class="flex items-center">
+                    <div class="w-4 h-4 flex items-center justify-center text-green-500">
+                        <i class="ri-arrow-up-line"></i>
+                    </div>
+                    <span class="text-green-500 text-sm font-medium">2.1%</span>
+                    <span class="text-gray-500 text-sm ml-1">from last month</span>
+                </div>
+            </div>
+            <div class="bg-white rounded shadow-sm p-5">
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <p class="text-gray-500 text-sm">Under Maintenance</p>
+                        <h3 class="text-2xl font-bold text-gray-800">32</h3>
+                    </div>
+                    <div class="w-10 h-10 flex items-center justify-center rounded-full bg-yellow-50 text-yellow-600">
+                        <i class="ri-tools-line ri-lg"></i>
+                    </div>
+                </div>
+                <div class="flex items-center">
+                    <div class="w-4 h-4 flex items-center justify-center text-red-500">
+                        <i class="ri-arrow-up-line"></i>
+                    </div>
+                    <span class="text-red-500 text-sm font-medium">8.3%</span>
+                    <span class="text-gray-500 text-sm ml-1">from last month</span>
+                </div>
+            </div>
+            <div class="bg-white rounded shadow-sm p-5">
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <p class="text-gray-500 text-sm">Out of Service</p>
+                        <h3 class="text-2xl font-bold text-gray-800">16</h3>
+                    </div>
+                    <div class="w-10 h-10 flex items-center justify-center rounded-full bg-red-50 text-red-600">
+                        <i class="ri-error-warning-line ri-lg"></i>
+                    </div>
+                </div>
+                <div class="flex items-center">
+                    <div class="w-4 h-4 flex items-center justify-center text-green-500">
+                        <i class="ri-arrow-down-line"></i>
+                    </div>
+                    <span class="text-green-500 text-sm font-medium">5.2%</span>
+                    <span class="text-gray-500 text-sm ml-1">from last month</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Vehicle Fleet Table -->
+        <div class="bg-white rounded shadow-sm mb-6 overflow-hidden">
+            <div class="p-5 border-b border-gray-100">
+                <div class="flex flex-wrap items-center justify-between gap-4">
+                    <h3 class="text-lg font-semibold text-gray-800">Vehicle Fleet</h3>
+                    <div class="flex items-center space-x-2">
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 flex items-center pl-3">
+                                <div class="w-4 h-4 flex items-center justify-center text-gray-400">
+                                    <i class="ri-search-line"></i>
+                                </div>
+                            </div>
+                            <input type="text" class="search-input pl-8 pr-4 py-2 w-60 border border-gray-200 rounded-full text-sm" placeholder="Search vehicles...">
+                        </div>
+                        <button class="flex items-center space-x-1 bg-white border border-gray-200 px-3 py-2 rounded-button text-sm text-gray-600 hover:bg-gray-50">
+                            <div class="w-4 h-4 flex items-center justify-center">
+                                <i class="ri-filter-3-line"></i>
+                            </div>
+                            <span>Filter</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead>
+                        <tr class="bg-gray-50">
+                            <th class="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <div class="flex items-center space-x-1">
+                                    <span>Vehicle ID</span>
+                                    <div class="w-4 h-4 flex items-center justify-center text-gray-400">
+                                        <i class="ri-arrow-up-down-line"></i>
+                                    </div>
+                                </div>
+                            </th>
+                            <th class="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <div class="flex items-center space-x-1">
+                                    <span>Type</span>
+                                    <div class="w-4 h-4 flex items-center justify-center text-gray-400">
+                                        <i class="ri-arrow-up-down-line"></i>
+                                    </div>
+                                </div>
+                            </th>
+                            <th class="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <div class="flex items-center space-x-1">
+                                    <span>Status</span>
+                                    <div class="w-4 h-4 flex items-center justify-center text-gray-400">
+                                        <i class="ri-arrow-up-down-line"></i>
+                                    </div>
+                                </div>
+                            </th>
+                            <th class="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <div class="flex items-center space-x-1">
+                                    <span>Location</span>
+                                    <div class="w-4 h-4 flex items-center justify-center text-gray-400">
+                                        <i class="ri-arrow-up-down-line"></i>
+                                    </div>
+                                </div>
+                            </th>
+                            <th class="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <div class="flex items-center space-x-1">
+                                    <span>Last Maintenance</span>
+                                    <div class="w-4 h-4 flex items-center justify-center text-gray-400">
+                                        <i class="ri-arrow-up-down-line"></i>
+                                    </div>
+                                </div>
+                            </th>
+                            <th class="py-3 px-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100">
+                        <tr class="hover:bg-gray-50">
+                            <td class="py-3 px-4 whitespace-nowrap">
+                                <div class="text-sm font-medium text-gray-900">VEH-001</div>
+                            </td>
+                            <td class="py-3 px-4 whitespace-nowrap">
+                                <div class="flex items-center">
+                                    <div class="w-8 h-8 flex items-center justify-center rounded-full bg-blue-50 text-blue-600 mr-2">
+                                        <i class="ri-jeep-line"></i>
+                                    </div>
+                                    <span class="text-sm text-gray-900">Humvee</span>
+                                </div>
+                            </td>
+                            <td class="py-3 px-4 whitespace-nowrap">
+                                <span class="px-2 py-1 text-xs font-medium rounded-full bg-green-50 text-green-700">Operational</span>
+                            </td>
+                            <td class="py-3 px-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">Base Alpha</div>
+                            </td>
+                            <td class="py-3 px-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">April 1, 2025</div>
+                            </td>
+                            <td class="py-3 px-4 whitespace-nowrap text-right text-sm">
+                                <div class="relative inline-block">
+                                    <button class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100">
+                                        <i class="ri-more-2-fill text-gray-500"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="hover:bg-gray-50">
+                            <td class="py-3 px-4 whitespace-nowrap">
+                                <div class="text-sm font-medium text-gray-900">VEH-002</div>
+                            </td>
+                            <td class="py-3 px-4 whitespace-nowrap">
+                                <div class="flex items-center">
+                                    <div class="w-8 h-8 flex items-center justify-center rounded-full bg-blue-50 text-blue-600 mr-2">
+                                        <i class="ri-truck-line"></i>
+                                    </div>
+                                    <span class="text-sm text-gray-900">Transport Truck</span>
+                                </div>
+                            </td>
+                            <td class="py-3 px-4 whitespace-nowrap">
+                                <span class="px-2 py-1 text-xs font-medium rounded-full bg-yellow-50 text-yellow-700">Maintenance</span>
+                            </td>
+                            <td class="py-3 px-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">Base Bravo</div>
+                            </td>
+                            <td class="py-3 px-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">March 22, 2025</div>
+                            </td>
+                            <td class="py-3 px-4 whitespace-nowrap text-right text-sm">
+                                <div class="relative inline-block">
+                                    <button class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100">
+                                        <i class="ri-more-2-fill text-gray-500"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="hover:bg-gray-50">
+                            <td class="py-3 px-4 whitespace-nowrap">
+                                <div class="text-sm font-medium text-gray-900">VEH-003</div>
+                            </td>
+                            <td class="py-3 px-4 whitespace-nowrap">
+                                <div class="flex items-center">
+                                    <div class="w-8 h-8 flex items-center justify-center rounded-full bg-blue-50 text-blue-600 mr-2">
+                                        <i class="ri-tank-line"></i>
+                                    </div>
+                                    <span class="text-sm text-gray-900">Armored Tank</span>
+                                </div>
+                            </td>
+                            <td class="py-3 px-4 whitespace-nowrap">
+                                <span class="px-2 py-1 text-xs font-medium rounded-full bg-green-50 text-green-700">Operational</span>
+                            </td>
+                            <td class="py-3 px-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">Forward Outpost</div>
+                            </td>
+                            <td class="py-3 px-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">April 5, 2025</div>
+                            </td>
+                            <td class="py-3 px-4 whitespace-nowrap text-right text-sm">
+                                <div class="relative inline-block">
+                                    <button class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100">
+                                        <i class="ri-more-2-fill text-gray-500"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="hover:bg-gray-50">
+                            <td class="py-3 px-4 whitespace-nowrap">
+                                <div class="text-sm font-medium text-gray-900">VEH-004</div>
+                            </td>
+                            <td class="py-3 px-4 whitespace-nowrap">
+                                <div class="flex items-center">
+                                    <div class="w-8 h-8 flex items-center justify-center rounded-full bg-blue-50 text-blue-600 mr-2">
+                                        <i class="ri-plane-line"></i>
+                                    </div>
+                                    <span class="text-sm text-gray-900">Aircraft</span>
+                                </div>
+                            </td>
+                            <td class="py-3 px-4 whitespace-nowrap">
+                                <span class="px-2 py-1 text-xs font-medium rounded-full bg-red-50 text-red-700">Out of Service</span>
+                            </td>
+                            <td class="py-3 px-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">Airfield Charlie</div>
+                            </td>
+                            <td class="py-3 px-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">February 12, 2025</div>
+                            </td>
+                            <td class="py-3 px-4 whitespace-nowrap text-right text-sm">
+                                <div class="relative inline-block">
+                                    <button class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100">
+                                        <i class="ri-more-2-fill text-gray-500"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="hover:bg-gray-50">
+                            <td class="py-3 px-4 whitespace-nowrap">
+                                <div class="text-sm font-medium text-gray-900">VEH-005</div>
+                            </td>
+                            <td class="py-3 px-4 whitespace-nowrap">
+                                <div class="flex items-center">
+                                    <div class="w-8 h-8 flex items-center justify-center rounded-full bg-blue-50 text-blue-600 mr-2">
+                                        <i class="ri-ship-line"></i>
+                                    </div>
+                                    <span class="text-sm text-gray-900">Naval Vessel</span>
+                                </div>
+                            </td>
+                            <td class="py-3 px-4 whitespace-nowrap">
+                                <span class="px-2 py-1 text-xs font-medium rounded-full bg-green-50 text-green-700">Operational</span>
+                            </td>
+                            <td class="py-3 px-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">Naval Base Delta</div>
+                            </td>
+                            <td class="py-3 px-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">March 30, 2025</div>
+                            </td>
+                            <td class="py-3 px-4 whitespace-nowrap text-right text-sm">
+                                <div class="relative inline-block">
+                                    <button class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100">
+                                        <i class="ri-more-2-fill text-gray-500"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="p-4 border-t border-gray-100 flex items-center justify-between">
+                <div class="text-sm text-gray-500">
+                    Showing 5 of 246 vehicles
+                </div>
+                <div class="flex items-center space-x-2">
+                    <button class="w-8 h-8 flex items-center justify-center rounded border border-gray-200 bg-white text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                        <i class="ri-arrow-left-s-line"></i>
+                    </button>
+                    <button class="w-8 h-8 flex items-center justify-center rounded bg-primary text-white">1</button>
+                    <button class="w-8 h-8 flex items-center justify-center rounded border border-gray-200 bg-white text-gray-700 hover:bg-gray-50">2</button>
+                    <button class="w-8 h-8 flex items-center justify-center rounded border border-gray-200 bg-white text-gray-700 hover:bg-gray-50">3</button>
+                    <button class="w-8 h-8 flex items-center justify-center rounded border border-gray-200 bg-white text-gray-500 hover:bg-gray-50">
+                        <i class="ri-more-line"></i>
+                    </button>
+                    <button class="w-8 h-8 flex items-center justify-center rounded border border-gray-200 bg-white text-gray-500 hover:bg-gray-50">
+                        <i class="ri-arrow-right-s-line"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Fleet Analytics -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            <!-- Map -->
+            <div class="bg-white rounded shadow-sm p-5">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">Vehicle Locations</h3>
+                <div id="map" class="w-full"></div>
+                <div class="mt-4 flex flex-wrap gap-3">
+                    <span class="flex items-center text-sm text-gray-600">
+                        <span class="w-3 h-3 rounded-full bg-green-500 mr-1"></span> Operational
+                    </span>
+                    <span class="flex items-center text-sm text-gray-600">
+                        <span class="w-3 h-3 rounded-full bg-yellow-500 mr-1"></span> Under Maintenance
+                    </span>
+                    <span class="flex items-center text-sm text-gray-600">
+                        <span class="w-3 h-3 rounded-full bg-red-500 mr-1"></span> Out of Service
+                    </span>
+                </div>
+            </div>
+            
+            <!-- Charts -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div class="bg-white rounded shadow-sm p-5">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Vehicle Types</h3>
+                    <div id="vehicleTypesChart" class="w-full h-52"></div>
+                </div>
+                <div class="bg-white rounded shadow-sm p-5">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Operational Status</h3>
+                    <div id="statusChart" class="w-full h-52"></div>
+                </div>
+                <div class="bg-white rounded shadow-sm p-5 sm:col-span-2">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Maintenance History</h3>
+                    <div id="maintenanceChart" class="w-full h-60"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Maintenance Schedule -->
+        <div class="bg-white rounded shadow-sm mb-6">
+            <div class="p-5 border-b border-gray-100">
+                <div class="flex flex-wrap items-center justify-between gap-4">
+                    <h3 class="text-lg font-semibold text-gray-800">Maintenance Schedule</h3>
+                    <div class="flex items-center space-x-2">
+                        <button class="flex items-center space-x-1 bg-white border border-gray-200 px-3 py-2 rounded-button text-sm text-gray-600 hover:bg-gray-50">
+                            <div class="w-4 h-4 flex items-center justify-center">
+                                <i class="ri-history-line"></i>
+                            </div>
+                            <span>View History</span>
+                        </button>
+                        <button class="flex items-center space-x-1 bg-primary px-3 py-2 rounded-button text-sm text-white hover:bg-primary/90">
+                            <div class="w-4 h-4 flex items-center justify-center">
+                                <i class="ri-calendar-line"></i>
+                            </div>
+                            <span>Schedule Maintenance</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead>
+                        <tr class="bg-gray-50">
+                            <th class="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Vehicle ID</th>
+                            <th class="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                            <th class="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Scheduled Date</th>
+                            <th class="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Maintenance Type</th>
+                            <th class="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Priority</th>
+                            <th class="py-3 px-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100">
+                        <tr class="hover:bg-gray-50">
+                            <td class="py-3 px-4 whitespace-nowrap">
+                                <div class="text-sm font-medium text-gray-900">VEH-002</div>
+                            </td>
+                            <td class="py-3 px-4 whitespace-nowrap">
+                                <div class="flex items-center">
+                                    <div class="w-8 h-8 flex items-center justify-center rounded-full bg-blue-50 text-blue-600 mr-2">
+                                        <i class="ri-truck-line"></i>
+                                    </div>
+                                    <span class="text-sm text-gray-900">Transport Truck</span>
+                                </div>
+                            </td>
+                            <td class="py-3 px-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">April 15, 2025</div>
+                            </td>
+                            <td class="py-3 px-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">Engine Overhaul</div>
+                            </td>
+                            <td class="py-3 px-4 whitespace-nowrap">
+                                <span class="px-2 py-1 text-xs font-medium rounded-full bg-red-50 text-red-700">High</span>
+                            </td>
+                            <td class="py-3 px-4 whitespace-nowrap text-right">
+                                <button class="text-sm text-primary hover:text-primary/80">Details</button>
+                            </td>
+                        </tr>
+                        <tr class="hover:bg-gray-50">
+                            <td class="py-3 px-4 whitespace-nowrap">
+                                <div class="text-sm font-medium text-gray-900">VEH-012</div>
+                            </td>
+                            <td class="py-3 px-4 whitespace-nowrap">
+                                <div class="flex items-center">
+                                    <div class="w-8 h-8 flex items-center justify-center rounded-full bg-blue-50 text-blue-600 mr-2">
+                                        <i class="ri-jeep-line"></i>
+                                    </div>
+                                    <span class="text-sm text-gray-900">Humvee</span>
+                                </div>
+                            </td>
+                            <td class="py-3 px-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">April 18, 2025</div>
+                            </td>
+                            <td class="py-3 px-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">Regular Service</div>
+                            </td>
+                            <td class="py-3 px-4 whitespace-nowrap">
+                                <span class="px-2 py-1 text-xs font-medium rounded-full bg-yellow-50 text-yellow-700">Medium</span>
+                            </td>
+                            <td class="py-3 px-4 whitespace-nowrap text-right">
+                                <button class="text-sm text-primary hover:text-primary/80">Details</button>
+                            </td>
+                        </tr>
+                        <tr class="hover:bg-gray-50">
+                            <td class="py-3 px-4 whitespace-nowrap">
+                                <div class="text-sm font-medium text-gray-900">VEH-004</div>
+                            </td>
+                            <td class="py-3 px-4 whitespace-nowrap">
+                                <div class="flex items-center">
+                                    <div class="w-8 h-8 flex items-center justify-center rounded-full bg-blue-50 text-blue-600 mr-2">
+                                        <i class="ri-plane-line"></i>
+                                    </div>
+                                    <span class="text-sm text-gray-900">Aircraft</span>
+                                </div>
+                            </td>
+                            <td class="py-3 px-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">April 20, 2025</div>
+                            </td>
+                            <td class="py-3 px-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">Major Repair</div>
+                            </td>
+                            <td class="py-3 px-4 whitespace-nowrap">
+                                <span class="px-2 py-1 text-xs font-medium rounded-full bg-red-50 text-red-700">High</span>
+                            </td>
+                            <td class="py-3 px-4 whitespace-nowrap text-right">
+                                <button class="text-sm text-primary hover:text-primary/80">Details</button>
+                            </td>
+                        </tr>
+                        <tr class="hover:bg-gray-50">
+                            <td class="py-3 px-4 whitespace-nowrap">
+                                <div class="text-sm font-medium text-gray-900">VEH-023</div>
+                            </td>
+                            <td class="py-3 px-4 whitespace-nowrap">
+                                <div class="flex items-center">
+                                    <div class="w-8 h-8 flex items-center justify-center rounded-full bg-blue-50 text-blue-600 mr-2">
+                                        <i class="ri-jeep-line"></i>
+                                    </div>
+                                    <span class="text-sm text-gray-900">Patrol Vehicle</span>
+                                </div>
+                            </td>
+                            <td class="py-3 px-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">April 25, 2025</div>
+                            </td>
+                            <td class="py-3 px-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">Regular Service</div>
+                            </td>
+                            <td class="py-3 px-4 whitespace-nowrap">
+                                <span class="px-2 py-1 text-xs font-medium rounded-full bg-green-50 text-green-700">Low</span>
+                            </td>
+                            <td class="py-3 px-4 whitespace-nowrap text-right">
+                                <button class="text-sm text-primary hover:text-primary/80">Details</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="p-4 border-t border-gray-100 flex items-center justify-between">
+                <div class="text-sm text-gray-500">
+                    Showing 4 of 12 scheduled maintenance
+                </div>
+                <div class="flex items-center space-x-1">
+                    <button class="w-8 h-8 flex items-center justify-center rounded border border-gray-200 bg-white text-gray-500 hover:bg-gray-50">
+                        <i class="ri-arrow-left-s-line"></i>
+                    </button>
+                    <button class="w-8 h-8 flex items-center justify-center rounded bg-primary text-white">1</button>
+                    <button class="w-8 h-8 flex items-center justify-center rounded border border-gray-200 bg-white text-gray-700 hover:bg-gray-50">2</button>
+                    <button class="w-8 h-8 flex items-center justify-center rounded border border-gray-200 bg-white text-gray-700 hover:bg-gray-50">3</button>
+                    <button class="w-8 h-8 flex items-center justify-center rounded border border-gray-200 bg-white text-gray-500 hover:bg-gray-50">
+                        <i class="ri-arrow-right-s-line"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions Panel -->
+        <div class="fixed bottom-6 right-6 z-10">
+            <!-- Floating Toggle Button -->
+            <button id="quickActionsToggle" class="w-14 h-14 flex items-center justify-center rounded-full bg-primary text-white shadow-lg hover:bg-primary/90 transition-all">
+                <i class="ri-add-line ri-lg"></i>
+            </button>
+            
+            <!-- Quick Actions Panel (hidden by default) -->
+            <div id="quickActionsPanel" class="bg-white rounded-lg shadow-lg p-4 w-64 mt-4 hidden">
+                <h4 class="text-md font-semibold text-gray-800 mb-3">Quick Actions</h4>
+                <div class="space-y-2">
+                    <button class="flex items-center w-full space-x-2 p-2 rounded-button hover:bg-gray-50 text-left">
+                        <div class="w-8 h-8 flex items-center justify-center rounded-full bg-primary/10 text-primary">
+                            <i class="ri-calendar-check-line"></i>
+                        </div>
+                        <span class="text-sm text-gray-700">Schedule Maintenance</span>
+                    </button>
+                    <button class="flex items-center w-full space-x-2 p-2 rounded-button hover:bg-gray-50 text-left">
+                        <div class="w-8 h-8 flex items-center justify-center rounded-full bg-green-100 text-green-600">
+                            <i class="ri-refresh-line"></i>
+                        </div>
+                        <span class="text-sm text-gray-700">Update Status</span>
+                    </button>
+                    <button class="flex items-center w-full space-x-2 p-2 rounded-button hover:bg-gray-50 text-left">
+                        <div class="w-8 h-8 flex items-center justify-center rounded-full bg-blue-100 text-blue-600">
+                            <i class="ri-file-list-3-line"></i>
+                        </div>
+                        <span class="text-sm text-gray-700">View Detailed Report</span>
+                    </button>
+                    <button class="flex items-center w-full space-x-2 p-2 rounded-button hover:bg-gray-50 text-left">
+                        <div class="w-8 h-8 flex items-center justify-center rounded-full bg-purple-100 text-purple-600">
+                            <i class="ri-download-2-line"></i>
+                        </div>
+                        <span class="text-sm text-gray-700">Export Data</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script>
+    // Initialize map
+    const map = L.map('map').setView([34.05, -118.25], 5);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
+
+    // Vehicle location markers
+    const vehicleLocations = [
+        { id: 'VEH-001', lat: 34.05, lng: -118.25, status: 'operational', name: 'Humvee at Base Alpha' },
+        { id: 'VEH-002', lat: 34.15, lng: -118.15, status: 'maintenance', name: 'Transport Truck at Base Bravo' },
+        { id: 'VEH-003', lat: 34.00, lng: -117.95, status: 'operational', name: 'Armored Tank at Forward Outpost' },
+        { id: 'VEH-004', lat: 34.20, lng: -118.35, status: 'outofservice', name: 'Aircraft at Airfield Charlie' },
+        { id: 'VEH-005', lat: 33.95, lng: -118.40, status: 'operational', name: 'Naval Vessel at Naval Base Delta' }
+    ];
+
+    // Define marker icons based on status
+    const icons = {
+        operational: L.divIcon({
+            className: 'custom-div-icon',
+            html: `<div style="background-color: #10B981; width: 12px; height: 12px; border-radius: 50%; border: 2px solid white;"></div>`,
+            iconSize: [12, 12],
+            iconAnchor: [6, 6]
+        }),
+        maintenance: L.divIcon({
+            className: 'custom-div-icon',
+            html: `<div style="background-color: #F59E0B; width: 12px; height: 12px; border-radius: 50%; border: 2px solid white;"></div>`,
+            iconSize: [12, 12],
+            iconAnchor: [6, 6]
+        }),
+        outofservice: L.divIcon({
+            className: 'custom-div-icon',
+            html: `<div style="background-color: #EF4444; width: 12px; height: 12px; border-radius: 50%; border: 2px solid white;"></div>`,
+            iconSize: [12, 12],
+            iconAnchor: [6, 6]
+        })
+    };
+
+    // Add markers to map
+    vehicleLocations.forEach(vehicle => {
+        const marker = L.marker([vehicle.lat, vehicle.lng], { icon: icons[vehicle.status] }).addTo(map);
+        marker.bindPopup(`<b>${vehicle.id}</b><br>${vehicle.name}`);
+    });
+
+    // Vehicle Types Chart
+    const vehicleTypesChart = echarts.init(document.getElementById('vehicleTypesChart'));
+    const vehicleTypesOption = {
+        tooltip: {
+            trigger: 'item',
+            formatter: '{a} <br/>{b}: {c} ({d}%)'
+        },
+        legend: {
+            orient: 'vertical',
+            right: 10,
+            top: 'center',
+            data: ['Humvee', 'Transport Truck', 'Armored Tank', 'Aircraft', 'Naval Vessel']
+        },
+        series: [
+            {
+                name: 'Vehicle Types',
+                type: 'pie',
+                radius: ['40%', '70%'],
+                avoidLabelOverlap: false,
+                itemStyle: {
+                    borderRadius: 10,
+                    borderColor: '#fff',
+                    borderWidth: 2
+                },
+                label: {
+                    show: false,
+                    position: 'center'
+                },
+                emphasis: {
+                    label: {
+                        show: true,
+                        fontSize: '12',
+                        fontWeight: 'bold'
+                    }
+                },
+                labelLine: {
+                    show: false
+                },
+                data: [
+                    { value: 92, name: 'Humvee' },
+                    { value: 68, name: 'Transport Truck' },
+                    { value: 34, name: 'Armored Tank' },
+                    { value: 28, name: 'Aircraft' },
+                    { value: 24, name: 'Naval Vessel' }
+                ]
+            }
+        ]
+    };
+    vehicleTypesChart.setOption(vehicleTypesOption);
+
+    // Status Chart
+    const statusChart = echarts.init(document.getElementById('statusChart'));
+    const statusOption = {
+        tooltip: {
+            trigger: 'item',
+            formatter: '{a} <br/>{b}: {c} ({d}%)'
+        },
+        legend: {
+            bottom: '0%',
+            left: 'center',
+            data: ['Operational', 'Maintenance', 'Out of Service']
+        },
+        series: [
+            {
+                name: 'Status',
+                type: 'pie',
+                radius: ['40%', '70%'],
+                center: ['50%', '40%'],
+                color: ['#10B981', '#F59E0B', '#EF4444'],
+                avoidLabelOverlap: false,
+                itemStyle: {
+                    borderRadius: 10,
+                    borderColor: '#fff',
+                    borderWidth: 2
+                },
+                label: {
+                    show: false,
+                    position: 'center'
+                },
+                emphasis: {
+                    label: {
+                        show: true,
+                        fontSize: '12',
+                        fontWeight: 'bold'
+                    }
+                },
+                labelLine: {
+                    show: false
+                },
+                data: [
+                    { value: 198, name: 'Operational' },
+                    { value: 32, name: 'Maintenance' },
+                    { value: 16, name: 'Out of Service' }
+                ]
+            }
+        ]
+    };
+    statusChart.setOption(statusOption);
+
+    // Maintenance History Chart
+    const maintenanceChart = echarts.init(document.getElementById('maintenanceChart'));
+    const maintenanceOption = {
+        tooltip: {
+            trigger: 'axis',
+            axisPointer: {
+                type: 'shadow'
+            }
+        },
+        legend: {
+            data: ['Regular Service', 'Major Repairs', 'Emergency Fixes'],
+            bottom: '0%'
+        },
+        grid: {
+            left: '3%',
+            right: '4%',
+            bottom: '15%',
+            containLabel: true
+        },
+        xAxis: {
+            type: 'category',
+            data: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun']
+        },
+        yAxis: {
+            type: 'value'
+        },
+        series: [
+            {
+                name: 'Regular Service',
+                type: 'bar',
+                stack: 'total',
+                emphasis: {
+                    focus: 'series'
+                },
+                color: '#1A56DB',
+                data: [24, 28, 32, 26, 29, 30]
+            },
+            {
+                name: 'Major Repairs',
+                type: 'bar',
+                stack: 'total',
+                emphasis: {
+                    focus: 'series'
+                },
+                color: '#F59E0B',
+                data: [12, 15, 9, 14, 10, 8]
+            },
+            {
+                name: 'Emergency Fixes',
+                type: 'bar',
+                stack: 'total',
+                emphasis: {
+                    focus: 'series'
+                },
+                color: '#EF4444',
+                data: [5, 3, 7, 4, 6, 2]
+            }
+        ]
+    };
+    maintenanceChart.setOption(maintenanceOption);
+
+    // Handle window resize to make charts responsive
+    window.addEventListener('resize', function() {
+        vehicleTypesChart.resize();
+        statusChart.resize();
+        maintenanceChart.resize();
+    });
+
+    // Quick Actions Toggle Functionality
+    document.getElementById('quickActionsToggle').addEventListener('click', function() {
+        const panel = document.getElementById('quickActionsPanel');
+        const button = document.getElementById('quickActionsToggle');
+        
+        // Toggle panel visibility
+        if (panel.classList.contains('hidden')) {
+            panel.classList.remove('hidden');
+            button.innerHTML = '<i class="ri-close-line ri-lg"></i>';
+        } else {
+            panel.classList.add('hidden');
+            button.innerHTML = '<i class="ri-add-line ri-lg"></i>';
+        }
+    });
+</script>
+</body>
+</html>

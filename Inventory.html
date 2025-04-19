@@ -1,0 +1,1052 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Military Inventory System</title>
+    <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+    <script>tailwind.config={theme:{extend:{colors:{primary:'#1a56db',secondary:'#475569'},borderRadius:{'none':'0px','sm':'8px',DEFAULT:'12px','md':'16px','lg':'20px','xl':'24px','2xl':'28px','3xl':'32px','full':'9999px','button':'12px'}}}}</script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.5.0/echarts.min.js"></script>
+    <style>
+        :where([class^="ri-"])::before { content: "\f3c2"; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+        .custom-checkbox {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #cbd5e1;
+            border-radius: 4px;
+            outline: none;
+            cursor: pointer;
+            position: relative;
+        }
+        .custom-checkbox:checked {
+            background-color: #1a56db;
+            border-color: #1a56db;
+        }
+        .custom-checkbox:checked::after {
+            content: '';
+            position: absolute;
+            top: 3px;
+            left: 6px;
+            width: 6px;
+            height: 10px;
+            border: solid white;
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg);
+        }
+        .custom-switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 24px;
+        }
+        .custom-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .switch-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #cbd5e1;
+            transition: .4s;
+            border-radius: 24px;
+        }
+        .switch-slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .switch-slider {
+            background-color: #1a56db;
+        }
+        input:checked + .switch-slider:before {
+            transform: translateX(20px);
+        }
+        .custom-range {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 6px;
+            border-radius: 5px;
+            background: #e2e8f0;
+            outline: none;
+        }
+        .custom-range::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #1a56db;
+            cursor: pointer;
+        }
+        .custom-range::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #1a56db;
+            cursor: pointer;
+            border: none;
+        }
+        .custom-select {
+            position: relative;
+            display: inline-block;
+        }
+        .custom-select-btn {
+            padding: 8px 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            background-color: white;
+            cursor: pointer;
+            min-width: 160px;
+            text-align: left;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .custom-select-options {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background-color: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            margin-top: 4px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 10;
+            display: none;
+        }
+        .custom-select-option {
+            padding: 8px 12px;
+            cursor: pointer;
+        }
+        .custom-select-option:hover {
+            background-color: #f1f5f9;
+        }
+        .search-input:focus {
+            outline: none;
+        }
+        .table-checkbox {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            border: 2px solid #cbd5e1;
+            border-radius: 4px;
+            outline: none;
+            cursor: pointer;
+            position: relative;
+        }
+        .table-checkbox:checked {
+            background-color: #1a56db;
+            border-color: #1a56db;
+        }
+        .table-checkbox:checked::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 5px;
+            width: 5px;
+            height: 9px;
+            border: solid white;
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg);
+        }
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 100%;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            z-index: 10;
+            min-width: 160px;
+        }
+        .dropdown-item {
+            padding: 10px 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .dropdown-item:hover {
+            background-color: #f1f5f9;
+        }
+        .dropdown-item:first-child {
+            border-top-left-radius: 12px;
+            border-top-right-radius: 12px;
+        }
+        .dropdown-item:last-child {
+            border-bottom-left-radius: 12px;
+            border-bottom-right-radius: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="min-h-screen flex flex-col">
+        <!-- Header -->
+        <header class="bg-white shadow-sm">
+            <div class="flex items-center justify-between px-6 py-4">
+                <div class="flex items-center space-x-2">
+                    <div class="w-10 h-10 flex items-center justify-center bg-primary rounded-full">
+                        <i class="ri-shield-line text-white ri-lg"></i>
+                    </div>
+                    <h1 class="text-2xl font-['Pacifico'] text-gray-800">logo</h1>
+                </div>
+                <div class="flex items-center space-x-6">
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 flex items-center pl-3">
+                            <div class="w-5 h-5 flex items-center justify-center text-gray-400">
+                                <i class="ri-search-line"></i>
+                            </div>
+                        </div>
+                        <input type="text" class="search-input pl-10 pr-4 py-2 w-64 bg-gray-50 border-none rounded-full text-sm" placeholder="Search inventory...">
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <div class="w-8 h-8 flex items-center justify-center text-gray-600 hover:text-primary">
+                            <i class="ri-notification-3-line ri-lg"></i>
+                        </div>
+                        <div class="w-8 h-8 flex items-center justify-center text-gray-600 hover:text-primary">
+                            <i class="ri-settings-3-line ri-lg"></i>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <div class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
+                                <i class="ri-user-line text-gray-600"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm font-medium text-gray-800">Col. James Wilson</p>
+                                <p class="text-xs text-gray-500">Administrator</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <nav class="flex px-6 py-2 border-t border-gray-100">
+                <ul class="flex space-x-8">
+                    <li><a href="index.html" class="text-gray-600 hover:text-gray-900 py-2">Dashboard</a></li>
+                    <li><a href="Inventory.html" class="text-primary font-medium py-2 border-b-2 border-primary">Inventory</a></li>
+                    <li><a href="Ammunition.html" class="text-gray-600 hover:text-gray-900 py-2">Ammunition</a></li>
+                    <li><a href="Vehicles.html" class="text-gray-600 hover:text-gray-900 py-2">Vehicles</a></li>
+                    <li><a href="Weapons.html" class="text-gray-600 hover:text-gray-900 py-2">Weapons</a></li>
+                    <li><a href="personnel.html" class="text-gray-600 hover:text-gray-900 py-2">Personnel</a></li>
+                    <li><a href="Reports.html" class="text-gray-600 hover:text-gray-900 py-2">Reports</a></li>
+                </ul>
+            </nav>
+        </header>
+
+        <!-- Main Content -->
+        <main class="flex-1 p-6">
+            <div class="flex items-center text-sm text-gray-500 mb-4">
+                <a href="https://readdy.ai/home/3074bf80-6d51-4a8b-bd61-c8cd12161c3f/61db8365-9bd2-45c2-ae9e-66338808e102" data-readdy="true" class="hover:text-primary flex items-center">
+                    <div class="w-4 h-4 flex items-center justify-center mr-1">
+                        <i class="ri-dashboard-line"></i>
+                    </div>
+                    Dashboard
+                </a>
+                <div class="w-4 h-4 flex items-center justify-center mx-2">
+                    <i class="ri-arrow-right-s-line"></i>
+                </div>
+                <span class="text-gray-800">Inventory</span>
+            </div>
+            
+            <div class="mb-6 flex items-center justify-between">
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-800">Inventory Management</h2>
+                    <p class="text-gray-500">Manage and track all military equipment and supplies</p>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <span class="text-sm text-gray-500">Last updated: April 9, 2025 - 08:45 AM</span>
+                    <button class="flex items-center space-x-1 bg-white border border-gray-200 px-3 py-2 rounded-button text-sm text-gray-600 hover:bg-gray-50 whitespace-nowrap">
+                        <div class="w-4 h-4 flex items-center justify-center">
+                            <i class="ri-refresh-line"></i>
+                        </div>
+                        <span>Refresh</span>
+                    </button>
+                    <button class="flex items-center space-x-1 bg-primary px-3 py-2 rounded-button text-sm text-white hover:bg-primary/90 whitespace-nowrap">
+                        <div class="w-4 h-4 flex items-center justify-center">
+                            <i class="ri-add-line"></i>
+                        </div>
+                        <span>Add New Item</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Filter Section -->
+            <div class="bg-white rounded shadow-sm p-5 mb-6">
+                <div class="grid grid-cols-5 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                        <div class="custom-select w-full">
+                            <button class="custom-select-btn w-full text-sm text-gray-600">
+                                <span>All Categories</span>
+                                <div class="w-4 h-4 flex items-center justify-center">
+                                    <i class="ri-arrow-down-s-line"></i>
+                                </div>
+                            </button>
+                            <div class="custom-select-options w-full">
+                                <div class="custom-select-option text-sm">All Categories</div>
+                                <div class="custom-select-option text-sm">Weapons</div>
+                                <div class="custom-select-option text-sm">Ammunition</div>
+                                <div class="custom-select-option text-sm">Vehicles</div>
+                                <div class="custom-select-option text-sm">Communication</div>
+                                <div class="custom-select-option text-sm">Medical</div>
+                                <div class="custom-select-option text-sm">Clothing</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                        <div class="custom-select w-full">
+                            <button class="custom-select-btn w-full text-sm text-gray-600">
+                                <span>All Statuses</span>
+                                <div class="w-4 h-4 flex items-center justify-center">
+                                    <i class="ri-arrow-down-s-line"></i>
+                                </div>
+                            </button>
+                            <div class="custom-select-options w-full">
+                                <div class="custom-select-option text-sm">All Statuses</div>
+                                <div class="custom-select-option text-sm">In Stock</div>
+                                <div class="custom-select-option text-sm">Low Stock</div>
+                                <div class="custom-select-option text-sm">Out of Stock</div>
+                                <div class="custom-select-option text-sm">On Order</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Location</label>
+                        <div class="custom-select w-full">
+                            <button class="custom-select-btn w-full text-sm text-gray-600">
+                                <span>All Locations</span>
+                                <div class="w-4 h-4 flex items-center justify-center">
+                                    <i class="ri-arrow-down-s-line"></i>
+                                </div>
+                            </button>
+                            <div class="custom-select-options w-full">
+                                <div class="custom-select-option text-sm">All Locations</div>
+                                <div class="custom-select-option text-sm">Main Warehouse</div>
+                                <div class="custom-select-option text-sm">North Depot</div>
+                                <div class="custom-select-option text-sm">East Wing</div>
+                                <div class="custom-select-option text-sm">South Facility</div>
+                                <div class="custom-select-option text-sm">West Bunker</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Date Range</label>
+                        <div class="flex items-center space-x-2">
+                            <input type="date" class="border-none bg-gray-50 rounded text-sm py-2 px-3 w-full" value="2025-03-01">
+                            <span class="text-gray-500">to</span>
+                            <input type="date" class="border-none bg-gray-50 rounded text-sm py-2 px-3 w-full" value="2025-04-09">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Search</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 flex items-center pl-3">
+                                <div class="w-4 h-4 flex items-center justify-center text-gray-400">
+                                    <i class="ri-search-line"></i>
+                                </div>
+                            </div>
+                            <input type="text" class="search-input pl-10 pr-4 py-2 w-full bg-gray-50 border-none rounded text-sm" placeholder="Search by ID, name...">
+                        </div>
+                    </div>
+                </div>
+                <div class="flex justify-end mt-4">
+                    <button class="flex items-center space-x-1 bg-gray-100 px-3 py-2 rounded-button text-sm text-gray-600 hover:bg-gray-200 whitespace-nowrap">
+                        <div class="w-4 h-4 flex items-center justify-center">
+                            <i class="ri-refresh-line"></i>
+                        </div>
+                        <span>Clear Filters</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Table Actions -->
+            <div class="flex justify-between items-center mb-4">
+                <div class="flex items-center space-x-2">
+                    <button class="flex items-center space-x-1 bg-white border border-gray-200 px-3 py-2 rounded-button text-sm text-gray-600 hover:bg-gray-50 whitespace-nowrap">
+                        <div class="w-4 h-4 flex items-center justify-center">
+                            <i class="ri-delete-bin-line"></i>
+                        </div>
+                        <span>Delete Selected</span>
+                    </button>
+                    <button class="flex items-center space-x-1 bg-white border border-gray-200 px-3 py-2 rounded-button text-sm text-gray-600 hover:bg-gray-50 whitespace-nowrap">
+                        <div class="w-4 h-4 flex items-center justify-center">
+                            <i class="ri-file-download-line"></i>
+                        </div>
+                        <span>Export CSV</span>
+                    </button>
+                    <button class="flex items-center space-x-1 bg-white border border-gray-200 px-3 py-2 rounded-button text-sm text-gray-600 hover:bg-gray-50 whitespace-nowrap">
+                        <div class="w-4 h-4 flex items-center justify-center">
+                            <i class="ri-printer-line"></i>
+                        </div>
+                        <span>Print</span>
+                    </button>
+                    <div class="custom-select">
+                        <button class="custom-select-btn text-sm text-gray-600">
+                            <span>Bulk Actions</span>
+                            <div class="w-4 h-4 flex items-center justify-center">
+                                <i class="ri-arrow-down-s-line"></i>
+                            </div>
+                        </button>
+                        <div class="custom-select-options">
+                            <div class="custom-select-option text-sm">Change Status</div>
+                            <div class="custom-select-option text-sm">Move Location</div>
+                            <div class="custom-select-option text-sm">Schedule Maintenance</div>
+                            <div class="custom-select-option text-sm">Update Expiry</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <span class="text-sm text-gray-500">Show</span>
+                    <div class="custom-select">
+                        <button class="custom-select-btn text-sm text-gray-600 py-1 px-2">
+                            <span>20</span>
+                            <div class="w-4 h-4 flex items-center justify-center">
+                                <i class="ri-arrow-down-s-line"></i>
+                            </div>
+                        </button>
+                        <div class="custom-select-options">
+                            <div class="custom-select-option text-sm">10</div>
+                            <div class="custom-select-option text-sm">20</div>
+                            <div class="custom-select-option text-sm">50</div>
+                            <div class="custom-select-option text-sm">100</div>
+                        </div>
+                    </div>
+                    <span class="text-sm text-gray-500">entries</span>
+                </div>
+            </div>
+
+            <!-- Inventory Table -->
+            <div class="bg-white rounded shadow-sm overflow-hidden mb-6">
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead>
+                            <tr class="bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <th class="px-6 py-3">
+                                    <div class="flex items-center">
+                                        <input type="checkbox" class="table-checkbox mr-2" id="select-all">
+                                        <label for="select-all" class="sr-only">Select All</label>
+                                    </div>
+                                </th>
+                                <th class="px-6 py-3 cursor-pointer">
+                                    <div class="flex items-center">
+                                        Item ID
+                                        <div class="w-4 h-4 flex items-center justify-center ml-1">
+                                            <i class="ri-arrow-up-s-line"></i>
+                                        </div>
+                                    </div>
+                                </th>
+                                <th class="px-6 py-3 cursor-pointer">
+                                    <div class="flex items-center">
+                                        Item Name
+                                        <div class="w-4 h-4 flex items-center justify-center ml-1">
+                                            <i class="ri-arrow-down-s-line"></i>
+                                        </div>
+                                    </div>
+                                </th>
+                                <th class="px-6 py-3">Category</th>
+                                <th class="px-6 py-3 cursor-pointer">
+                                    <div class="flex items-center">
+                                        Quantity
+                                        <div class="w-4 h-4 flex items-center justify-center ml-1">
+                                            <i class="ri-arrow-down-s-line"></i>
+                                        </div>
+                                    </div>
+                                </th>
+                                <th class="px-6 py-3">Status</th>
+                                <th class="px-6 py-3">Location</th>
+                                <th class="px-6 py-3">Last Updated</th>
+                                <th class="px-6 py-3">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-6 py-4">
+                                    <input type="checkbox" class="table-checkbox">
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-800">INV-78542</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">M4A1 Carbine</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">Weapons</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">1,245</td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">In Stock</span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">Main Warehouse</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Apr 8, 2025</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 relative">
+                                    <button class="text-gray-500 hover:text-gray-700 dropdown-trigger">
+                                        <div class="w-6 h-6 flex items-center justify-center">
+                                            <i class="ri-more-2-fill"></i>
+                                        </div>
+                                    </button>
+                                    <div class="dropdown-menu">
+                                        <div class="dropdown-item">
+                                            <div class="w-4 h-4 flex items-center justify-center text-gray-500">
+                                                <i class="ri-eye-line"></i>
+                                            </div>
+                                            <span class="text-sm">View Details</span>
+                                        </div>
+                                        <div class="dropdown-item">
+                                            <div class="w-4 h-4 flex items-center justify-center text-gray-500">
+                                                <i class="ri-edit-line"></i>
+                                            </div>
+                                            <span class="text-sm">Edit</span>
+                                        </div>
+                                        <div class="dropdown-item">
+                                            <div class="w-4 h-4 flex items-center justify-center text-gray-500">
+                                                <i class="ri-refresh-line"></i>
+                                            </div>
+                                            <span class="text-sm">Update Status</span>
+                                        </div>
+                                        <div class="dropdown-item">
+                                            <div class="w-4 h-4 flex items-center justify-center text-red-500">
+                                                <i class="ri-delete-bin-line"></i>
+                                            </div>
+                                            <span class="text-sm text-red-500">Delete</span>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-6 py-4">
+                                    <input type="checkbox" class="table-checkbox">
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-800">INV-78543</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">5.56mm NATO Rounds</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">Ammunition</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">125,460</td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">In Stock</span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">North Depot</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Apr 7, 2025</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 relative">
+                                    <button class="text-gray-500 hover:text-gray-700 dropdown-trigger">
+                                        <div class="w-6 h-6 flex items-center justify-center">
+                                            <i class="ri-more-2-fill"></i>
+                                        </div>
+                                    </button>
+                                    <div class="dropdown-menu">
+                                        <div class="dropdown-item">
+                                            <div class="w-4 h-4 flex items-center justify-center text-gray-500">
+                                                <i class="ri-eye-line"></i>
+                                            </div>
+                                            <span class="text-sm">View Details</span>
+                                        </div>
+                                        <div class="dropdown-item">
+                                            <div class="w-4 h-4 flex items-center justify-center text-gray-500">
+                                                <i class="ri-edit-line"></i>
+                                            </div>
+                                            <span class="text-sm">Edit</span>
+                                        </div>
+                                        <div class="dropdown-item">
+                                            <div class="w-4 h-4 flex items-center justify-center text-gray-500">
+                                                <i class="ri-refresh-line"></i>
+                                            </div>
+                                            <span class="text-sm">Update Status</span>
+                                        </div>
+                                        <div class="dropdown-item">
+                                            <div class="w-4 h-4 flex items-center justify-center text-red-500">
+                                                <i class="ri-delete-bin-line"></i>
+                                            </div>
+                                            <span class="text-sm text-red-500">Delete</span>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-6 py-4">
+                                    <input type="checkbox" class="table-checkbox">
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-800">INV-78544</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">HMMWV (Humvee)</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">Vehicles</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">87</td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">In Stock</span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">East Wing</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Apr 6, 2025</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 relative">
+                                    <button class="text-gray-500 hover:text-gray-700 dropdown-trigger">
+                                        <div class="w-6 h-6 flex items-center justify-center">
+                                            <i class="ri-more-2-fill"></i>
+                                        </div>
+                                    </button>
+                                    <div class="dropdown-menu">
+                                        <div class="dropdown-item">
+                                            <div class="w-4 h-4 flex items-center justify-center text-gray-500">
+                                                <i class="ri-eye-line"></i>
+                                            </div>
+                                            <span class="text-sm">View Details</span>
+                                        </div>
+                                        <div class="dropdown-item">
+                                            <div class="w-4 h-4 flex items-center justify-center text-gray-500">
+                                                <i class="ri-edit-line"></i>
+                                            </div>
+                                            <span class="text-sm">Edit</span>
+                                        </div>
+                                        <div class="dropdown-item">
+                                            <div class="w-4 h-4 flex items-center justify-center text-gray-500">
+                                                <i class="ri-refresh-line"></i>
+                                            </div>
+                                            <span class="text-sm">Update Status</span>
+                                        </div>
+                                        <div class="dropdown-item">
+                                            <div class="w-4 h-4 flex items-center justify-center text-red-500">
+                                                <i class="ri-delete-bin-line"></i>
+                                            </div>
+                                            <span class="text-sm text-red-500">Delete</span>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-6 py-4">
+                                    <input type="checkbox" class="table-checkbox">
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-800">INV-78545</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">Tactical Radio Set</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">Communication</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">342</td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-2 py-1 text-xs font-medium bg-yellow-100 text-yellow-800 rounded-full">Low Stock</span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">South Facility</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Apr 5, 2025</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 relative">
+                                    <button class="text-gray-500 hover:text-gray-700 dropdown-trigger">
+                                        <div class="w-6 h-6 flex items-center justify-center">
+                                            <i class="ri-more-2-fill"></i>
+                                        </div>
+                                    </button>
+                                    <div class="dropdown-menu">
+                                        <div class="dropdown-item">
+                                            <div class="w-4 h-4 flex items-center justify-center text-gray-500">
+                                                <i class="ri-eye-line"></i>
+                                            </div>
+                                            <span class="text-sm">View Details</span>
+                                        </div>
+                                        <div class="dropdown-item">
+                                            <div class="w-4 h-4 flex items-center justify-center text-gray-500">
+                                                <i class="ri-edit-line"></i>
+                                            </div>
+                                            <span class="text-sm">Edit</span>
+                                        </div>
+                                        <div class="dropdown-item">
+                                            <div class="w-4 h-4 flex items-center justify-center text-gray-500">
+                                                <i class="ri-refresh-line"></i>
+                                            </div>
+                                            <span class="text-sm">Update Status</span>
+                                        </div>
+                                        <div class="dropdown-item">
+                                            <div class="w-4 h-4 flex items-center justify-center text-red-500">
+                                                <i class="ri-delete-bin-line"></i>
+                                            </div>
+                                            <span class="text-sm text-red-500">Delete</span>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-6 py-4">
+                                    <input type="checkbox" class="table-checkbox">
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-800">INV-78546</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">Night Vision Goggles</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">Equipment</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">185</td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">In Stock</span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">West Bunker</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Apr 4, 2025</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 relative">
+                                    <button class="text-gray-500 hover:text-gray-700 dropdown-trigger">
+                                        <div class="w-6 h-6 flex items-center justify-center">
+                                            <i class="ri-more-2-fill"></i>
+                                        </div>
+                                    </button>
+                                    <div class="dropdown-menu">
+                                        <div class="dropdown-item">
+                                            <div class="w-4 h-4 flex items-center justify-center text-gray-500">
+                                                <i class="ri-eye-line"></i>
+                                            </div>
+                                            <span class="text-sm">View Details</span>
+                                        </div>
+                                        <div class="dropdown-item">
+                                            <div class="w-4 h-4 flex items-center justify-center text-gray-500">
+                                                <i class="ri-edit-line"></i>
+                                            </div>
+                                            <span class="text-sm">Edit</span>
+                                        </div>
+                                        <div class="dropdown-item">
+                                            <div class="w-4 h-4 flex items-center justify-center text-gray-500">
+                                                <i class="ri-refresh-line"></i>
+                                            </div>
+                                            <span class="text-sm">Update Status</span>
+                                        </div>
+                                        <div class="dropdown-item">
+                                            <div class="w-4 h-4 flex items-center justify-center text-red-500">
+                                                <i class="ri-delete-bin-line"></i>
+                                            </div>
+                                            <span class="text-sm text-red-500">Delete</span>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-6 py-4">
+                                    <input type="checkbox" class="table-checkbox">
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-800">INV-78547</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">Field Medical Kit</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">Medical</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">0</td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-2 py-1 text-xs font-medium bg-red-100 text-red-800 rounded-full">Out of Stock</span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">Main Warehouse</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Apr 3, 2025</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 relative">
+                                    <button class="text-gray-500 hover:text-gray-700 dropdown-trigger">
+                                        <div class="w-6 h-6 flex items-center justify-center">
+                                            <i class="ri-more-2-fill"></i>
+                                        </div>
+                                    </button>
+                                    <div class="dropdown-menu">
+                                        <div class="dropdown-item">
+                                            <div class="w-4 h-4 flex items-center justify-center text-gray-500">
+                                                <i class="ri-eye-line"></i>
+                                            </div>
+                                            <span class="text-sm">View Details</span>
+                                        </div>
+                                        <div class="dropdown-item">
+                                            <div class="w-4 h-4 flex items-center justify-center text-gray-500">
+                                                <i class="ri-edit-line"></i>
+                                            </div>
+                                            <span class="text-sm">Edit</span>
+                                        </div>
+                                        <div class="dropdown-item">
+                                            <div class="w-4 h-4 flex items-center justify-center text-gray-500">
+                                                <i class="ri-refresh-line"></i>
+                                            </div>
+                                            <span class="text-sm">Update Status</span>
+                                        </div>
+                                        <div class="dropdown-item">
+                                            <div class="w-4 h-4 flex items-center justify-center text-red-500">
+                                                <i class="ri-delete-bin-line"></i>
+                                            </div>
+                                            <span class="text-sm text-red-500">Delete</span>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-6 py-4">
+                                    <input type="checkbox" class="table-checkbox">
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-800">INV-78548</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">Combat Helmet</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">Clothing</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">1,542</td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">In Stock</span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">North Depot</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Apr 2, 2025</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 relative">
+                                    <button class="text-gray-500 hover:text-gray-700 dropdown-trigger">
+                                        <div class="w-6 h-6 flex items-center justify-center">
+                                            <i class="ri-more-2-fill"></i>
+                                        </div>
+                                    </button>
+                                    <div class="dropdown-menu">
+                                        <div class="dropdown-item">
+                                            <div class="w-4 h-4 flex items-center justify-center text-gray-500">
+                                                <i class="ri-eye-line"></i>
+                                            </div>
+                                            <span class="text-sm">View Details</span>
+                                        </div>
+                                        <div class="dropdown-item">
+                                            <div class="w-4 h-4 flex items-center justify-center text-gray-500">
+                                                <i class="ri-edit-line"></i>
+                                            </div>
+                                            <span class="text-sm">Edit</span>
+                                        </div>
+                                        <div class="dropdown-item">
+                                            <div class="w-4 h-4 flex items-center justify-center text-gray-500">
+                                                <i class="ri-refresh-line"></i>
+                                            </div>
+                                            <span class="text-sm">Update Status</span>
+                                        </div>
+                                        <div class="dropdown-item">
+                                            <div class="w-4 h-4 flex items-center justify-center text-red-500">
+                                                <i class="ri-delete-bin-line"></i>
+                                            </div>
+                                            <span class="text-sm text-red-500">Delete</span>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-6 py-4">
+                                    <input type="checkbox" class="table-checkbox">
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-800">INV-78549</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">Tactical Drone</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">Equipment</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">68</td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-2 py-1 text-xs font-medium bg-yellow-100 text-yellow-800 rounded-full">Low Stock</span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">East Wing</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Apr 1, 2025</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 relative">
+                                    <button class="text-gray-500 hover:text-gray-700 dropdown-trigger">
+                                        <div class="w-6 h-6 flex items-center justify-center">
+                                            <i class="ri-more-2-fill"></i>
+                                        </div>
+                                    </button>
+                                    <div class="dropdown-menu">
+                                        <div class="dropdown-item">
+                                            <div class="w-4 h-4 flex items-center justify-center text-gray-500">
+                                                <i class="ri-eye-line"></i>
+                                            </div>
+                                            <span class="text-sm">View Details</span>
+                                        </div>
+                                        <div class="dropdown-item">
+                                            <div class="w-4 h-4 flex items-center justify-center text-gray-500">
+                                                <i class="ri-edit-line"></i>
+                                            </div>
+                                            <span class="text-sm">Edit</span>
+                                        </div>
+                                        <div class="dropdown-item">
+                                            <div class="w-4 h-4 flex items-center justify-center text-gray-500">
+                                                <i class="ri-refresh-line"></i>
+                                            </div>
+                                            <span class="text-sm">Update Status</span>
+                                        </div>
+                                        <div class="dropdown-item">
+                                            <div class="w-4 h-4 flex items-center justify-center text-red-500">
+                                                <i class="ri-delete-bin-line"></i>
+                                            </div>
+                                            <span class="text-sm text-red-500">Delete</span>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-6 py-4">
+                                    <input type="checkbox" class="table-checkbox">
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-800">INV-78550</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">7.62mm NATO Rounds</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">Ammunition</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">85,720</td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">In Stock</span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">South Facility</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Mar 31, 2025</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 relative">
+                                    <button class="text-gray-500 hover:text-gray-700 dropdown-trigger">
+                                        <div class="w-6 h-6 flex items-center justify-center">
+                                            <i class="ri-more-2-fill"></i>
+                                        </div>
+                                    </button>
+                                    <div class="dropdown-menu">
+                                        <div class="dropdown-item">
+                                            <div class="w-4 h-4 flex items-center justify-center text-gray-500">
+                                                <i class="ri-eye-line"></i>
+                                            </div>
+                                            <span class="text-sm">View Details</span>
+                                        </div>
+                                        <div class="dropdown-item">
+                                            <div class="w-4 h-4 flex items-center justify-center text-gray-500">
+                                                <i class="ri-edit-line"></i>
+                                            </div>
+                                            <span class="text-sm">Edit</span>
+                                        </div>
+                                        <div class="dropdown-item">
+                                            <div class="w-4 h-4 flex items-center justify-center text-gray-500">
+                                                <i class="ri-refresh-line"></i>
+                                            </div>
+                                            <span class="text-sm">Update Status</span>
+                                        </div>
+                                        <div class="dropdown-item">
+                                            <div class="w-4 h-4 flex items-center justify-center text-red-500">
+                                                <i class="ri-delete-bin-line"></i>
+                                            </div>
+                                            <span class="text-sm text-red-500">Delete</span>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-6 py-4">
+                                    <input type="checkbox" class="table-checkbox">
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-800">INV-78551</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">Ballistic Vest</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">Clothing</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">1,250</td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">In Stock</span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">West Bunker</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Mar 30, 2025</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 relative">
+                                    <button class="text-gray-500 hover:text-gray-700 dropdown-trigger">
+                                        <div class="w-6 h-6 flex items-center justify-center">
+                                            <i class="ri-more-2-fill"></i>
+                                        </div>
+                                    </button>
+                                    <div class="dropdown-menu">
+                                        <div class="dropdown-item">
+                                            <div class="w-4 h-4 flex items-center justify-center text-gray-500">
+                                                <i class="ri-eye-line"></i>
+                                            </div>
+                                            <span class="text-sm">View Details</span>
+                                        </div>
+                                        <div class="dropdown-item">
+                                            <div class="w-4 h-4 flex items-center justify-center text-gray-500">
+                                                <i class="ri-edit-line"></i>
+                                            </div>
+                                            <span class="text-sm">Edit</span>
+                                        </div>
+                                        <div class="dropdown-item">
+                                            <div class="w-4 h-4 flex items-center justify-center text-gray-500">
+                                                <i class="ri-refresh-line"></i>
+                                            </div>
+                                            <span class="text-sm">Update Status</span>
+                                        </div>
+                                        <div class="dropdown-item">
+                                            <div class="w-4 h-4 flex items-center justify-center text-red-500">
+                                                <i class="ri-delete-bin-line"></i>
+                                            </div>
+                                            <span class="text-sm text-red-500">Delete</span>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Pagination -->
+            <div class="flex items-center justify-between">
+                <div class="text-sm text-gray-500">
+                    Showing <span class="font-medium">1</span> to <span class="font-medium">10</span> of <span class="font-medium">156</span> entries
+                </div>
+                <div class="flex items-center space-x-2">
+                    <button class="flex items-center space-x-1 bg-white border border-gray-200 px-3 py-2 rounded-button text-sm text-gray-400 whitespace-nowrap cursor-not-allowed">
+                        <div class="w-4 h-4 flex items-center justify-center">
+                            <i class="ri-arrow-left-s-line"></i>
+                        </div>
+                        <span>Previous</span>
+                    </button>
+                    <div class="flex">
+                        <button class="w-10 h-10 flex items-center justify-center rounded-full bg-primary text-white">1</button>
+                        <button class="w-10 h-10 flex items-center justify-center rounded-full text-gray-600 hover:bg-gray-100">2</button>
+                        <button class="w-10 h-10 flex items-center justify-center rounded-full text-gray-600 hover:bg-gray-100">3</button>
+                        <button class="w-10 h-10 flex items-center justify-center rounded-full text-gray-600 hover:bg-gray-100">4</button>
+                        <button class="w-10 h-10 flex items-center justify-center rounded-full text-gray-600 hover:bg-gray-100">5</button>
+                    </div>
+                    <button class="flex items-center space-x-1 bg-white border border-gray-200 px-3 py-2 rounded-button text-sm text-gray-600 hover:bg-gray-50 whitespace-nowrap">
+                        <span>Next</span>
+                        <div class="w-4 h-4 flex items-center justify-center">
+                            <i class="ri-arrow-right-s-line"></i>
+                        </div>
+                    </button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Select all checkbox functionality
+        document.getElementById('select-all').addEventListener('change', function() {
+            const checkboxes = document.querySelectorAll('tbody .table-checkbox');
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = this.checked;
+            });
+        });
+
+        // Custom Select Functionality
+        document.querySelectorAll('.custom-select-btn').forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const options = this.nextElementSibling;
+                
+                // Close all other dropdowns first
+                document.querySelectorAll('.custom-select-options').forEach(dropdown => {
+                    if (dropdown !== options) {
+                        dropdown.style.display = 'none';
+                    }
+                });
+                
+                options.style.display = options.style.display === 'block' ? 'none' : 'block';
+            });
+        });
+
+        document.querySelectorAll('.custom-select-option').forEach(option => {
+            option.addEventListener('click', function() {
+                const select = this.closest('.custom-select');
+                const button = select.querySelector('.custom-select-btn span');
+                button.textContent = this.textContent;
+                this.parentElement.style.display = 'none';
+            });
+        });
+
+        // Dropdown menu functionality
+        document.querySelectorAll('.dropdown-trigger').forEach(trigger => {
+            trigger.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const menu = this.nextElementSibling;
+                
+                // Close all other dropdowns first
+                document.querySelectorAll('.dropdown-menu').forEach(dropdown => {
+                    if (dropdown !== menu) {
+                        dropdown.style.display = 'none';
+                    }
+                });
+                
+                menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+            });
+        });
+
+        // Close dropdowns when clicking outside
+        document.addEventListener('click', function() {
+            document.querySelectorAll('.custom-select-options, .dropdown-menu').forEach(dropdown => {
+                dropdown.style.display = 'none';
+            });
+        });
+    </script>
+</body>
+</html>

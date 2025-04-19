@@ -1,0 +1,1161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ammunition Management - Military Inventory System</title>
+<script src="https://cdn.tailwindcss.com/3.4.16"></script>
+<script>tailwind.config={theme:{extend:{colors:{primary:'#1a56db',secondary:'#475569'},borderRadius:{'none':'0px','sm':'8px',DEFAULT:'12px','md':'16px','lg':'20px','xl':'24px','2xl':'28px','3xl':'32px','full':'9999px','button':'12px'}}}}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.5.0/echarts.min.js"></script>
+<style>
+:where([class^="ri-"])::before { content: "\f3c2"; }
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #f8fafc;
+}
+.custom-checkbox {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 20px;
+    height: 20px;
+    border: 2px solid #cbd5e1;
+    border-radius: 4px;
+    outline: none;
+    cursor: pointer;
+    position: relative;
+}
+.custom-checkbox:checked {
+    background-color: #1a56db;
+    border-color: #1a56db;
+}
+.custom-checkbox:checked::after {
+    content: '';
+    position: absolute;
+    top: 3px;
+    left: 6px;
+    width: 6px;
+    height: 10px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+.custom-switch {
+    position: relative;
+    display: inline-block;
+    width: 44px;
+    height: 24px;
+}
+.custom-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+.switch-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #cbd5e1;
+    transition: .4s;
+    border-radius: 24px;
+}
+.switch-slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+input:checked + .switch-slider {
+    background-color: #1a56db;
+}
+input:checked + .switch-slider:before {
+    transform: translateX(20px);
+}
+.custom-range {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 6px;
+    border-radius: 5px;
+    background: #e2e8f0;
+    outline: none;
+}
+.custom-range::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #1a56db;
+    cursor: pointer;
+}
+.custom-range::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #1a56db;
+    cursor: pointer;
+    border: none;
+}
+.custom-select {
+    position: relative;
+    display: inline-block;
+}
+.custom-select-btn {
+    padding: 8px 12px;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    background-color: white;
+    cursor: pointer;
+    min-width: 160px;
+    text-align: left;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.custom-select-options {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background-color: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    margin-top: 4px;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 10;
+    display: none;
+}
+.custom-select-option {
+    padding: 8px 12px;
+    cursor: pointer;
+}
+.custom-select-option:hover {
+    background-color: #f1f5f9;
+}
+.search-input:focus {
+    outline: none;
+}
+.tab-active {
+    background-color: #1a56db;
+    color: white;
+}
+.tab-inactive {
+    background-color: #f1f5f9;
+    color: #475569;
+}
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+input[type="number"] {
+    -moz-appearance: textfield;
+}
+</style>
+</head>
+<body>
+<div class="min-h-screen flex flex-col">
+    <!-- Header -->
+    <header class="bg-white shadow-sm">
+        <div class="flex items-center justify-between px-6 py-4">
+            <div class="flex items-center space-x-2">
+                <div class="w-10 h-10 flex items-center justify-center bg-primary rounded-full">
+                    <i class="ri-shield-line text-white ri-lg"></i>
+                </div>
+                <h1 class="text-2xl font-['Pacifico'] text-gray-800">logo</h1>
+            </div>
+            <div class="flex items-center space-x-6">
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 flex items-center pl-3">
+                        <div class="w-5 h-5 flex items-center justify-center text-gray-400">
+                            <i class="ri-search-line"></i>
+                        </div>
+                    </div>
+                    <input type="text" class="search-input pl-10 pr-4 py-2 w-64 bg-gray-50 border-none rounded-full text-sm" placeholder="Search ammunition...">
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div class="w-8 h-8 flex items-center justify-center text-gray-600 hover:text-primary">
+                        <i class="ri-notification-3-line ri-lg"></i>
+                    </div>
+                    <div class="w-8 h-8 flex items-center justify-center text-gray-600 hover:text-primary">
+                        <i class="ri-settings-3-line ri-lg"></i>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <div class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
+                            <i class="ri-user-line text-gray-600"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-800">Col. James Wilson</p>
+                            <p class="text-xs text-gray-500">Administrator</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <nav class="flex px-6 py-2 border-t border-gray-100">
+            <ul class="flex space-x-8">
+                <li><a href="index.html" class="text-gray-600 hover:text-gray-900 py-2">Dashboard</a></li>
+                <li><a href="Inventory.html" class="text-gray-600 hover:text-gray-900 py-2">Inventory</a></li>
+                <li><a href="Ammunition.html" class="text-primary font-medium py-2 border-b-2 border-primary">Ammunition</a></li>
+                <li><a href="Vehicles.html" class="text-gray-600 hover:text-gray-900 py-2">Vehicles</a></li>
+                <li><a href="Weapons.html" class="text-gray-600 hover:text-gray-900 py-2">Weapons</a></li>
+                <li><a href="personnel.html" class="text-gray-600 hover:text-gray-900 py-2">Personnel</a></li>
+                <li><a href="Reports.html" class="text-gray-600 hover:text-gray-900 py-2">Reports</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-1 p-6">
+        <div class="mb-6 flex items-center justify-between">
+            <div>
+                <h2 class="text-2xl font-bold text-gray-800">Ammunition Management</h2>
+                <p class="text-gray-500">Comprehensive overview of ammunition inventory and status</p>
+            </div>
+            <div class="flex items-center space-x-3">
+                <span class="text-sm text-gray-500">Last updated: April 9, 2025 - 08:45 AM</span>
+                <button class="flex items-center space-x-1 bg-white border border-gray-200 px-3 py-2 rounded-button text-sm text-gray-600 hover:bg-gray-50 whitespace-nowrap">
+                    <div class="w-4 h-4 flex items-center justify-center">
+                        <i class="ri-refresh-line"></i>
+                    </div>
+                    <span>Refresh</span>
+                </button>
+                <button class="flex items-center space-x-1 bg-primary px-3 py-2 rounded-button text-sm text-white hover:bg-primary/90 whitespace-nowrap">
+                    <div class="w-4 h-4 flex items-center justify-center">
+                        <i class="ri-add-line"></i>
+                    </div>
+                    <span>Add New Ammunition</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Filters and Controls -->
+        <div class="bg-white rounded shadow-sm p-5 mb-6">
+            <div class="flex flex-wrap items-center justify-between gap-4">
+                <div class="flex items-center space-x-4">
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 flex items-center pl-3">
+                            <div class="w-5 h-5 flex items-center justify-center text-gray-400">
+                                <i class="ri-filter-3-line"></i>
+                            </div>
+                        </div>
+                        <input type="text" class="search-input pl-10 pr-4 py-2 w-64 bg-gray-50 border border-gray-200 rounded-button text-sm" placeholder="Filter by type, caliber...">
+                    </div>
+                    <div class="custom-select">
+                        <button class="custom-select-btn text-sm text-gray-600">
+                            <span>All Locations</span>
+                            <div class="w-4 h-4 flex items-center justify-center">
+                                <i class="ri-arrow-down-s-line"></i>
+                            </div>
+                        </button>
+                        <div class="custom-select-options">
+                            <div class="custom-select-option text-sm">All Locations</div>
+                            <div class="custom-select-option text-sm">Armory A</div>
+                            <div class="custom-select-option text-sm">Armory B</div>
+                            <div class="custom-select-option text-sm">Storage Facility C</div>
+                            <div class="custom-select-option text-sm">Field Storage</div>
+                        </div>
+                    </div>
+                    <div class="custom-select">
+                        <button class="custom-select-btn text-sm text-gray-600">
+                            <span>All Status</span>
+                            <div class="w-4 h-4 flex items-center justify-center">
+                                <i class="ri-arrow-down-s-line"></i>
+                            </div>
+                        </button>
+                        <div class="custom-select-options">
+                            <div class="custom-select-option text-sm">All Status</div>
+                            <div class="custom-select-option text-sm">Optimal</div>
+                            <div class="custom-select-option text-sm">Moderate</div>
+                            <div class="custom-select-option text-sm">Low</div>
+                            <div class="custom-select-option text-sm">Critical</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <div class="flex items-center space-x-1 px-1 py-1 bg-gray-100 rounded-full">
+                        <button class="tab-active px-3 py-1 rounded-full text-xs whitespace-nowrap">All</button>
+                        <button class="tab-inactive px-3 py-1 rounded-full text-xs whitespace-nowrap">Low Stock</button>
+                        <button class="tab-inactive px-3 py-1 rounded-full text-xs whitespace-nowrap">Expiring Soon</button>
+                    </div>
+                    <button class="flex items-center space-x-1 bg-white border border-gray-200 px-3 py-2 rounded-button text-sm text-gray-600 hover:bg-gray-50 whitespace-nowrap">
+                        <div class="w-4 h-4 flex items-center justify-center">
+                            <i class="ri-download-line"></i>
+                        </div>
+                        <span>Export</span>
+                    </button>
+                    <button class="flex items-center space-x-1 bg-white border border-gray-200 px-3 py-2 rounded-button text-sm text-gray-600 hover:bg-gray-50 whitespace-nowrap">
+                        <div class="w-4 h-4 flex items-center justify-center">
+                            <i class="ri-printer-line"></i>
+                        </div>
+                        <span>Print</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ammunition Inventory Table -->
+        <div class="bg-white rounded shadow-sm p-5 mb-6 overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full min-w-[1024px]">
+                    <thead>
+                        <tr class="text-left text-xs text-gray-500 border-b">
+                            <th class="pb-4 pl-4 font-medium">
+                                <input type="checkbox" class="custom-checkbox">
+                            </th>
+                            <th class="pb-4 font-medium">Type</th>
+                            <th class="pb-4 font-medium">Caliber</th>
+                            <th class="pb-4 font-medium">Quantity</th>
+                            <th class="pb-4 font-medium">Min Threshold</th>
+                            <th class="pb-4 font-medium">Status</th>
+                            <th class="pb-4 font-medium">Location</th>
+                            <th class="pb-4 font-medium">Expiry Date</th>
+                            <th class="pb-4 font-medium">Last Updated</th>
+                            <th class="pb-4 font-medium text-right pr-4">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="border-b border-gray-100 hover:bg-gray-50">
+                            <td class="py-4 pl-4">
+                                <input type="checkbox" class="custom-checkbox">
+                            </td>
+                            <td class="py-4 text-sm font-medium">NATO Standard</td>
+                            <td class="py-4 text-sm">5.56mm</td>
+                            <td class="py-4 text-sm">125,460</td>
+                            <td class="py-4 text-sm">50,000</td>
+                            <td class="py-4">
+                                <span class="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">Optimal</span>
+                            </td>
+                            <td class="py-4 text-sm">Armory A</td>
+                            <td class="py-4 text-sm">Jan 15, 2028</td>
+                            <td class="py-4 text-sm">Apr 8, 2025</td>
+                            <td class="py-4 text-right pr-4">
+                                <div class="flex items-center justify-end space-x-2">
+                                    <button class="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200">
+                                        <i class="ri-eye-line"></i>
+                                    </button>
+                                    <button class="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200">
+                                        <i class="ri-edit-line"></i>
+                                    </button>
+                                    <button class="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200">
+                                        <i class="ri-more-2-fill"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="border-b border-gray-100 hover:bg-gray-50">
+                            <td class="py-4 pl-4">
+                                <input type="checkbox" class="custom-checkbox">
+                            </td>
+                            <td class="py-4 text-sm font-medium">NATO Standard</td>
+                            <td class="py-4 text-sm">7.62mm</td>
+                            <td class="py-4 text-sm">85,720</td>
+                            <td class="py-4 text-sm">40,000</td>
+                            <td class="py-4">
+                                <span class="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">Optimal</span>
+                            </td>
+                            <td class="py-4 text-sm">Armory B</td>
+                            <td class="py-4 text-sm">Mar 22, 2027</td>
+                            <td class="py-4 text-sm">Apr 7, 2025</td>
+                            <td class="py-4 text-right pr-4">
+                                <div class="flex items-center justify-end space-x-2">
+                                    <button class="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200">
+                                        <i class="ri-eye-line"></i>
+                                    </button>
+                                    <button class="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200">
+                                        <i class="ri-edit-line"></i>
+                                    </button>
+                                    <button class="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200">
+                                        <i class="ri-more-2-fill"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="border-b border-gray-100 hover:bg-gray-50">
+                            <td class="py-4 pl-4">
+                                <input type="checkbox" class="custom-checkbox">
+                            </td>
+                            <td class="py-4 text-sm font-medium">Armor Piercing</td>
+                            <td class="py-4 text-sm">12.7mm</td>
+                            <td class="py-4 text-sm">12,850</td>
+                            <td class="py-4 text-sm">10,000</td>
+                            <td class="py-4">
+                                <span class="px-2 py-1 text-xs font-medium bg-yellow-100 text-yellow-800 rounded-full">Moderate</span>
+                            </td>
+                            <td class="py-4 text-sm">Storage Facility C</td>
+                            <td class="py-4 text-sm">Nov 10, 2026</td>
+                            <td class="py-4 text-sm">Apr 5, 2025</td>
+                            <td class="py-4 text-right pr-4">
+                                <div class="flex items-center justify-end space-x-2">
+                                    <button class="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200">
+                                        <i class="ri-eye-line"></i>
+                                    </button>
+                                    <button class="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200">
+                                        <i class="ri-edit-line"></i>
+                                    </button>
+                                    <button class="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200">
+                                        <i class="ri-more-2-fill"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="border-b border-gray-100 hover:bg-gray-50">
+                            <td class="py-4 pl-4">
+                                <input type="checkbox" class="custom-checkbox">
+                            </td>
+                            <td class="py-4 text-sm font-medium">High Explosive</td>
+                            <td class="py-4 text-sm">40mm</td>
+                            <td class="py-4 text-sm">5,240</td>
+                            <td class="py-4 text-sm">8,000</td>
+                            <td class="py-4">
+                                <span class="px-2 py-1 text-xs font-medium bg-red-100 text-red-800 rounded-full">Low</span>
+                            </td>
+                            <td class="py-4 text-sm">Armory A</td>
+                            <td class="py-4 text-sm">Aug 5, 2026</td>
+                            <td class="py-4 text-sm">Apr 3, 2025</td>
+                            <td class="py-4 text-right pr-4">
+                                <div class="flex items-center justify-end space-x-2">
+                                    <button class="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200">
+                                        <i class="ri-eye-line"></i>
+                                    </button>
+                                    <button class="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200">
+                                        <i class="ri-edit-line"></i>
+                                    </button>
+                                    <button class="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200">
+                                        <i class="ri-more-2-fill"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="border-b border-gray-100 hover:bg-gray-50">
+                            <td class="py-4 pl-4">
+                                <input type="checkbox" class="custom-checkbox">
+                            </td>
+                            <td class="py-4 text-sm font-medium">Tracer</td>
+                            <td class="py-4 text-sm">5.56mm</td>
+                            <td class="py-4 text-sm">28,650</td>
+                            <td class="py-4 text-sm">20,000</td>
+                            <td class="py-4">
+                                <span class="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">Optimal</span>
+                            </td>
+                            <td class="py-4 text-sm">Field Storage</td>
+                            <td class="py-4 text-sm">Feb 18, 2027</td>
+                            <td class="py-4 text-sm">Apr 1, 2025</td>
+                            <td class="py-4 text-right pr-4">
+                                <div class="flex items-center justify-end space-x-2">
+                                    <button class="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200">
+                                        <i class="ri-eye-line"></i>
+                                    </button>
+                                    <button class="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200">
+                                        <i class="ri-edit-line"></i>
+                                    </button>
+                                    <button class="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200">
+                                        <i class="ri-more-2-fill"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="border-b border-gray-100 hover:bg-gray-50">
+                            <td class="py-4 pl-4">
+                                <input type="checkbox" class="custom-checkbox">
+                            </td>
+                            <td class="py-4 text-sm font-medium">Incendiary</td>
+                            <td class="py-4 text-sm">7.62mm</td>
+                            <td class="py-4 text-sm">18,320</td>
+                            <td class="py-4 text-sm">15,000</td>
+                            <td class="py-4">
+                                <span class="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">Optimal</span>
+                            </td>
+                            <td class="py-4 text-sm">Armory B</td>
+                            <td class="py-4 text-sm">May 30, 2027</td>
+                            <td class="py-4 text-sm">Mar 28, 2025</td>
+                            <td class="py-4 text-right pr-4">
+                                <div class="flex items-center justify-end space-x-2">
+                                    <button class="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200">
+                                        <i class="ri-eye-line"></i>
+                                    </button>
+                                    <button class="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200">
+                                        <i class="ri-edit-line"></i>
+                                    </button>
+                                    <button class="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200">
+                                        <i class="ri-more-2-fill"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="border-b border-gray-100 hover:bg-gray-50">
+                            <td class="py-4 pl-4">
+                                <input type="checkbox" class="custom-checkbox">
+                            </td>
+                            <td class="py-4 text-sm font-medium">Hollow Point</td>
+                            <td class="py-4 text-sm">9mm</td>
+                            <td class="py-4 text-sm">42,180</td>
+                            <td class="py-4 text-sm">30,000</td>
+                            <td class="py-4">
+                                <span class="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">Optimal</span>
+                            </td>
+                            <td class="py-4 text-sm">Armory A</td>
+                            <td class="py-4 text-sm">Jul 12, 2027</td>
+                            <td class="py-4 text-sm">Mar 25, 2025</td>
+                            <td class="py-4 text-right pr-4">
+                                <div class="flex items-center justify-end space-x-2">
+                                    <button class="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200">
+                                        <i class="ri-eye-line"></i>
+                                    </button>
+                                    <button class="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200">
+                                        <i class="ri-edit-line"></i>
+                                    </button>
+                                    <button class="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200">
+                                        <i class="ri-more-2-fill"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="flex items-center justify-between mt-4 px-4">
+                <div class="text-sm text-gray-500">Showing 1 to 7 of 28 entries</div>
+                <div class="flex items-center space-x-2">
+                    <button class="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 disabled:opacity-50" disabled>
+                        <i class="ri-arrow-left-s-line"></i>
+                    </button>
+                    <button class="w-8 h-8 flex items-center justify-center rounded-full bg-primary text-white">1</button>
+                    <button class="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200">2</button>
+                    <button class="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200">3</button>
+                    <button class="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200">4</button>
+                    <button class="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200">
+                        <i class="ri-arrow-right-s-line"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Data Visualization Section -->
+        <div class="grid grid-cols-2 gap-6 mb-6">
+            <!-- Stock Level Chart -->
+            <div class="bg-white rounded shadow-sm p-5">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="font-bold text-gray-800">Ammunition Stock Levels</h3>
+                    <div class="flex items-center space-x-2">
+                        <div class="custom-select">
+                            <button class="custom-select-btn text-sm text-gray-600">
+                                <span>Last 30 Days</span>
+                                <div class="w-4 h-4 flex items-center justify-center">
+                                    <i class="ri-arrow-down-s-line"></i>
+                                </div>
+                            </button>
+                            <div class="custom-select-options">
+                                <div class="custom-select-option text-sm">Last 7 Days</div>
+                                <div class="custom-select-option text-sm">Last 30 Days</div>
+                                <div class="custom-select-option text-sm">Last 90 Days</div>
+                                <div class="custom-select-option text-sm">Last Year</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="stockLevelChart" class="w-full h-64"></div>
+            </div>
+            
+            <!-- Usage Trends Chart -->
+            <div class="bg-white rounded shadow-sm p-5">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="font-bold text-gray-800">Ammunition Usage Trends</h3>
+                    <div class="flex items-center space-x-2">
+                        <div class="custom-select">
+                            <button class="custom-select-btn text-sm text-gray-600">
+                                <span>Last 6 Months</span>
+                                <div class="w-4 h-4 flex items-center justify-center">
+                                    <i class="ri-arrow-down-s-line"></i>
+                                </div>
+                            </button>
+                            <div class="custom-select-options">
+                                <div class="custom-select-option text-sm">Last 3 Months</div>
+                                <div class="custom-select-option text-sm">Last 6 Months</div>
+                                <div class="custom-select-option text-sm">Last Year</div>
+                                <div class="custom-select-option text-sm">Last 2 Years</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="usageTrendsChart" class="w-full h-64"></div>
+            </div>
+        </div>
+
+        <!-- Management Cards -->
+        <div class="grid grid-cols-3 gap-6 mb-6">
+            <!-- Critical Alerts -->
+            <div class="bg-white rounded shadow-sm p-5">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="font-bold text-gray-800">Low Stock Alerts</h3>
+                    <button class="text-primary text-sm hover:underline whitespace-nowrap">View All</button>
+                </div>
+                <div class="space-y-4">
+                    <div class="flex items-start p-3 bg-red-50 rounded-lg">
+                        <div class="w-8 h-8 flex items-center justify-center rounded-full bg-red-100 text-red-600 mr-3 flex-shrink-0">
+                            <i class="ri-error-warning-line"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-800">High Explosive 40mm</p>
+                            <p class="text-xs text-gray-500">5,240 units (65% of threshold)</p>
+                            <p class="text-xs text-gray-400 mt-1">Armory A</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start p-3 bg-yellow-50 rounded-lg">
+                        <div class="w-8 h-8 flex items-center justify-center rounded-full bg-yellow-100 text-yellow-600 mr-3 flex-shrink-0">
+                            <i class="ri-alert-line"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-800">Smoke Grenades</p>
+                            <p class="text-xs text-gray-500">1,840 units (73% of threshold)</p>
+                            <p class="text-xs text-gray-400 mt-1">Storage Facility C</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start p-3 bg-yellow-50 rounded-lg">
+                        <div class="w-8 h-8 flex items-center justify-center rounded-full bg-yellow-100 text-yellow-600 mr-3 flex-shrink-0">
+                            <i class="ri-alert-line"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-800">Armor Piercing 12.7mm</p>
+                            <p class="text-xs text-gray-500">12,850 units (85% of threshold)</p>
+                            <p class="text-xs text-gray-400 mt-1">Storage Facility C</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Expiry Dates -->
+            <div class="bg-white rounded shadow-sm p-5">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="font-bold text-gray-800">Upcoming Expiry Dates</h3>
+                    <button class="text-primary text-sm hover:underline whitespace-nowrap">View All</button>
+                </div>
+                <div class="space-y-4">
+                    <div class="flex items-start p-3 bg-orange-50 rounded-lg">
+                        <div class="w-8 h-8 flex items-center justify-center rounded-full bg-orange-100 text-orange-600 mr-3 flex-shrink-0">
+                            <i class="ri-time-line"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-800">High Explosive 40mm</p>
+                            <p class="text-xs text-gray-500">Expires in 4 months (Aug 5, 2026)</p>
+                            <p class="text-xs text-gray-400 mt-1">5,240 units</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start p-3 bg-orange-50 rounded-lg">
+                        <div class="w-8 h-8 flex items-center justify-center rounded-full bg-orange-100 text-orange-600 mr-3 flex-shrink-0">
+                            <i class="ri-time-line"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-800">Armor Piercing 12.7mm</p>
+                            <p class="text-xs text-gray-500">Expires in 7 months (Nov 10, 2026)</p>
+                            <p class="text-xs text-gray-400 mt-1">12,850 units</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start p-3 bg-blue-50 rounded-lg">
+                        <div class="w-8 h-8 flex items-center justify-center rounded-full bg-blue-100 text-blue-600 mr-3 flex-shrink-0">
+                            <i class="ri-calendar-line"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-800">Tracer 5.56mm</p>
+                            <p class="text-xs text-gray-500">Expires in 10 months (Feb 18, 2027)</p>
+                            <p class="text-xs text-gray-400 mt-1">28,650 units</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Recent Transactions -->
+            <div class="bg-white rounded shadow-sm p-5">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="font-bold text-gray-800">Recent Transactions</h3>
+                    <button class="text-primary text-sm hover:underline whitespace-nowrap">View All</button>
+                </div>
+                <div class="space-y-4">
+                    <div class="flex items-start p-3 bg-gray-50 rounded-lg">
+                        <div class="w-8 h-8 flex items-center justify-center rounded-full bg-green-100 text-green-600 mr-3 flex-shrink-0">
+                            <i class="ri-arrow-down-line"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-800">Received: NATO 5.56mm</p>
+                            <p class="text-xs text-gray-500">+15,000 units</p>
+                            <p class="text-xs text-gray-400 mt-1">Today, 08:32 AM</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start p-3 bg-gray-50 rounded-lg">
+                        <div class="w-8 h-8 flex items-center justify-center rounded-full bg-red-100 text-red-600 mr-3 flex-shrink-0">
+                            <i class="ri-arrow-up-line"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-800">Issued: Tracer 5.56mm</p>
+                            <p class="text-xs text-gray-500">-2,500 units</p>
+                            <p class="text-xs text-gray-400 mt-1">Yesterday, 04:15 PM</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start p-3 bg-gray-50 rounded-lg">
+                        <div class="w-8 h-8 flex items-center justify-center rounded-full bg-red-100 text-red-600 mr-3 flex-shrink-0">
+                            <i class="ri-arrow-up-line"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-800">Issued: NATO 7.62mm</p>
+                            <p class="text-xs text-gray-500">-5,000 units</p>
+                            <p class="text-xs text-gray-400 mt-1">Apr 7, 2025, 10:22 AM</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Action Panel (appears when items are selected) -->
+    <div id="actionPanel" class="fixed bottom-0 left-0 right-0 bg-white shadow-lg border-t border-gray-200 py-3 px-6 hidden">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-4">
+                <span class="text-sm font-medium text-gray-800">3 items selected</span>
+                <button class="flex items-center space-x-1 bg-white border border-gray-200 px-3 py-2 rounded-button text-sm text-gray-600 hover:bg-gray-50 whitespace-nowrap">
+                    <span>Cancel</span>
+                </button>
+            </div>
+            <div class="flex items-center space-x-3">
+                <button class="flex items-center space-x-1 bg-white border border-gray-200 px-3 py-2 rounded-button text-sm text-gray-600 hover:bg-gray-50 whitespace-nowrap">
+                    <div class="w-4 h-4 flex items-center justify-center">
+                        <i class="ri-delete-bin-line"></i>
+                    </div>
+                    <span>Delete</span>
+                </button>
+                <button class="flex items-center space-x-1 bg-white border border-gray-200 px-3 py-2 rounded-button text-sm text-gray-600 hover:bg-gray-50 whitespace-nowrap">
+                    <div class="w-4 h-4 flex items-center justify-center">
+                        <i class="ri-arrow-left-right-line"></i>
+                    </div>
+                    <span>Move</span>
+                </button>
+                <button class="flex items-center space-x-1 bg-primary px-3 py-2 rounded-button text-sm text-white hover:bg-primary/90 whitespace-nowrap">
+                    <div class="w-4 h-4 flex items-center justify-center">
+                        <i class="ri-edit-line"></i>
+                    </div>
+                    <span>Update Quantity</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add New Ammunition Modal -->
+<div id="addAmmunitionModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl">
+        <div class="flex justify-between items-center p-6 border-b border-gray-200">
+            <h3 class="text-xl font-bold text-gray-800">Add New Ammunition</h3>
+            <button class="text-gray-400 hover:text-gray-600" id="closeModal">
+                <div class="w-6 h-6 flex items-center justify-center">
+                    <i class="ri-close-line ri-lg"></i>
+                </div>
+            </button>
+        </div>
+        <div class="p-6">
+            <div class="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Ammunition Type</label>
+                    <div class="custom-select w-full">
+                        <button class="custom-select-btn text-sm text-gray-600 w-full">
+                            <span>Select Type</span>
+                            <div class="w-4 h-4 flex items-center justify-center">
+                                <i class="ri-arrow-down-s-line"></i>
+                            </div>
+                        </button>
+                        <div class="custom-select-options">
+                            <div class="custom-select-option text-sm">NATO Standard</div>
+                            <div class="custom-select-option text-sm">Armor Piercing</div>
+                            <div class="custom-select-option text-sm">High Explosive</div>
+                            <div class="custom-select-option text-sm">Tracer</div>
+                            <div class="custom-select-option text-sm">Incendiary</div>
+                            <div class="custom-select-option text-sm">Hollow Point</div>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Caliber</label>
+                    <div class="custom-select w-full">
+                        <button class="custom-select-btn text-sm text-gray-600 w-full">
+                            <span>Select Caliber</span>
+                            <div class="w-4 h-4 flex items-center justify-center">
+                                <i class="ri-arrow-down-s-line"></i>
+                            </div>
+                        </button>
+                        <div class="custom-select-options">
+                            <div class="custom-select-option text-sm">5.56mm</div>
+                            <div class="custom-select-option text-sm">7.62mm</div>
+                            <div class="custom-select-option text-sm">9mm</div>
+                            <div class="custom-select-option text-sm">12.7mm</div>
+                            <div class="custom-select-option text-sm">40mm</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Quantity</label>
+                    <input type="number" class="w-full px-3 py-2 border border-gray-300 rounded-button text-sm" placeholder="Enter quantity">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Minimum Threshold</label>
+                    <input type="number" class="w-full px-3 py-2 border border-gray-300 rounded-button text-sm" placeholder="Enter threshold">
+                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Location</label>
+                    <div class="custom-select w-full">
+                        <button class="custom-select-btn text-sm text-gray-600 w-full">
+                            <span>Select Location</span>
+                            <div class="w-4 h-4 flex items-center justify-center">
+                                <i class="ri-arrow-down-s-line"></i>
+                            </div>
+                        </button>
+                        <div class="custom-select-options">
+                            <div class="custom-select-option text-sm">Armory A</div>
+                            <div class="custom-select-option text-sm">Armory B</div>
+                            <div class="custom-select-option text-sm">Storage Facility C</div>
+                            <div class="custom-select-option text-sm">Field Storage</div>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Expiry Date</label>
+                    <input type="date" class="w-full px-3 py-2 border border-gray-300 rounded-button text-sm">
+                </div>
+            </div>
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Additional Notes</label>
+                <textarea class="w-full px-3 py-2 border border-gray-300 rounded-button text-sm" rows="3" placeholder="Enter any additional information"></textarea>
+            </div>
+        </div>
+        <div class="flex justify-end space-x-3 p-6 border-t border-gray-200">
+            <button class="px-4 py-2 border border-gray-300 rounded-button text-sm text-gray-700 hover:bg-gray-50 whitespace-nowrap">Cancel</button>
+            <button class="px-4 py-2 bg-primary rounded-button text-sm text-white hover:bg-primary/90 whitespace-nowrap">Add Ammunition</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// Initialize Stock Level Chart
+const stockLevelChart = echarts.init(document.getElementById('stockLevelChart'));
+const stockLevelOption = {
+    animation: false,
+    tooltip: {
+        trigger: 'axis',
+        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+        borderColor: '#e2e8f0',
+        textStyle: {
+            color: '#1f2937'
+        }
+    },
+    legend: {
+        data: ['Current Stock', 'Minimum Threshold'],
+        bottom: 0,
+        textStyle: {
+            color: '#1f2937'
+        }
+    },
+    grid: {
+        left: 0,
+        right: 0,
+        top: 10,
+        bottom: 30,
+        containLabel: true
+    },
+    xAxis: {
+        type: 'category',
+        data: ['5.56mm', '7.62mm', '9mm', '12.7mm', '40mm'],
+        axisLine: {
+            lineStyle: {
+                color: '#e2e8f0'
+            }
+        },
+        axisLabel: {
+            color: '#64748b'
+        }
+    },
+    yAxis: {
+        type: 'value',
+        axisLine: {
+            show: false
+        },
+        axisTick: {
+            show: false
+        },
+        splitLine: {
+            lineStyle: {
+                color: '#e2e8f0'
+            }
+        },
+        axisLabel: {
+            color: '#64748b'
+        }
+    },
+    series: [
+        {
+            name: 'Current Stock',
+            type: 'bar',
+            barWidth: '40%',
+            itemStyle: {
+                color: 'rgba(87, 181, 231, 1)',
+                borderRadius: [8, 8, 0, 0]
+            },
+            data: [154110, 104040, 42180, 12850, 5240]
+        },
+        {
+            name: 'Minimum Threshold',
+            type: 'line',
+            symbol: 'none',
+            lineStyle: {
+                width: 2,
+                color: 'rgba(252, 141, 98, 1)',
+                type: 'dashed'
+            },
+            data: [70000, 55000, 30000, 10000, 8000]
+        }
+    ]
+};
+stockLevelChart.setOption(stockLevelOption);
+
+// Initialize Usage Trends Chart
+const usageTrendsChart = echarts.init(document.getElementById('usageTrendsChart'));
+const usageTrendsOption = {
+    animation: false,
+    tooltip: {
+        trigger: 'axis',
+        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+        borderColor: '#e2e8f0',
+        textStyle: {
+            color: '#1f2937'
+        }
+    },
+    legend: {
+        data: ['5.56mm', '7.62mm', '40mm'],
+        bottom: 0,
+        textStyle: {
+            color: '#1f2937'
+        }
+    },
+    grid: {
+        left: 0,
+        right: 0,
+        top: 10,
+        bottom: 30,
+        containLabel: true
+    },
+    xAxis: {
+        type: 'category',
+        boundaryGap: false,
+        data: ['Nov', 'Dec', 'Jan', 'Feb', 'Mar', 'Apr'],
+        axisLine: {
+            lineStyle: {
+                color: '#e2e8f0'
+            }
+        },
+        axisLabel: {
+            color: '#64748b'
+        }
+    },
+    yAxis: {
+        type: 'value',
+        axisLine: {
+            show: false
+        },
+        axisTick: {
+            show: false
+        },
+        splitLine: {
+            lineStyle: {
+                color: '#e2e8f0'
+            }
+        },
+        axisLabel: {
+            color: '#64748b'
+        }
+    },
+    series: [
+        {
+            name: '5.56mm',
+            type: 'line',
+            smooth: true,
+            symbol: 'none',
+            lineStyle: {
+                width: 3,
+                color: 'rgba(87, 181, 231, 1)'
+            },
+            areaStyle: {
+                color: {
+                    type: 'linear',
+                    x: 0,
+                    y: 0,
+                    x2: 0,
+                    y2: 1,
+                    colorStops: [{
+                        offset: 0, color: 'rgba(87, 181, 231, 0.1)'
+                    }, {
+                        offset: 1, color: 'rgba(87, 181, 231, 0.01)'
+                    }]
+                }
+            },
+            data: [12000, 15000, 10000, 18000, 20000, 15000]
+        },
+        {
+            name: '7.62mm',
+            type: 'line',
+            smooth: true,
+            symbol: 'none',
+            lineStyle: {
+                width: 3,
+                color: 'rgba(141, 211, 199, 1)'
+            },
+            areaStyle: {
+                color: {
+                    type: 'linear',
+                    x: 0,
+                    y: 0,
+                    x2: 0,
+                    y2: 1,
+                    colorStops: [{
+                        offset: 0, color: 'rgba(141, 211, 199, 0.1)'
+                    }, {
+                        offset: 1, color: 'rgba(141, 211, 199, 0.01)'
+                    }]
+                }
+            },
+            data: [8000, 10000, 7000, 12000, 15000, 11000]
+        },
+        {
+            name: '40mm',
+            type: 'line',
+            smooth: true,
+            symbol: 'none',
+            lineStyle: {
+                width: 3,
+                color: 'rgba(251, 191, 114, 1)'
+            },
+            areaStyle: {
+                color: {
+                    type: 'linear',
+                    x: 0,
+                    y: 0,
+                    x2: 0,
+                    y2: 1,
+                    colorStops: [{
+                        offset: 0, color: 'rgba(251, 191, 114, 0.1)'
+                    }, {
+                        offset: 1, color: 'rgba(251, 191, 114, 0.01)'
+                    }]
+                }
+            },
+            data: [1500, 2000, 1200, 2500, 3000, 2200]
+        }
+    ]
+};
+usageTrendsChart.setOption(usageTrendsOption);
+
+// Custom Select Functionality
+document.querySelectorAll('.custom-select-btn').forEach(button => {
+    button.addEventListener('click', function() {
+        const options = this.nextElementSibling;
+        options.style.display = options.style.display === 'block' ? 'none' : 'block';
+    });
+});
+
+document.querySelectorAll('.custom-select-option').forEach(option => {
+    option.addEventListener('click', function() {
+        const select = this.closest('.custom-select');
+        const button = select.querySelector('.custom-select-btn span');
+        button.textContent = this.textContent;
+        this.parentElement.style.display = 'none';
+    });
+});
+
+// Close dropdowns when clicking outside
+document.addEventListener('click', function(event) {
+    if (!event.target.closest('.custom-select')) {
+        document.querySelectorAll('.custom-select-options').forEach(dropdown => {
+            dropdown.style.display = 'none';
+        });
+    }
+});
+
+// Tab switching functionality
+document.querySelectorAll('.tab-inactive').forEach(tab => {
+    tab.addEventListener('click', function() {
+        document.querySelectorAll('.tab-active').forEach(activeTab => {
+            activeTab.classList.remove('tab-active');
+            activeTab.classList.add('tab-inactive');
+        });
+        this.classList.remove('tab-inactive');
+        this.classList.add('tab-active');
+    });
+});
+
+// Checkbox functionality for showing action panel
+const checkboxes = document.querySelectorAll('.custom-checkbox');
+const actionPanel = document.getElementById('actionPanel');
+
+checkboxes.forEach(checkbox => {
+    checkbox.addEventListener('change', function() {
+        const checkedBoxes = document.querySelectorAll('.custom-checkbox:checked');
+        if (checkedBoxes.length > 0 && checkedBoxes[0] !== checkboxes[0]) {
+            actionPanel.classList.remove('hidden');
+        } else {
+            actionPanel.classList.add('hidden');
+        }
+    });
+});
+
+// Modal functionality
+const addAmmunitionButton = document.querySelector('button:has(.ri-add-line)');
+const addAmmunitionModal = document.getElementById('addAmmunitionModal');
+const closeModal = document.getElementById('closeModal');
+
+addAmmunitionButton.addEventListener('click', function() {
+    addAmmunitionModal.classList.remove('hidden');
+});
+
+closeModal.addEventListener('click', function() {
+    addAmmunitionModal.classList.add('hidden');
+});
+
+// Close modal when clicking outside
+addAmmunitionModal.addEventListener('click', function(event) {
+    if (event.target === addAmmunitionModal) {
+        addAmmunitionModal.classList.add('hidden');
+    }
+});
+
+// Cancel button in modal
+document.querySelector('.border-t button').addEventListener('click', function() {
+    addAmmunitionModal.classList.add('hidden');
+});
+
+// Cancel button in action panel
+document.querySelector('#actionPanel button:nth-child(2)').addEventListener('click', function() {
+    actionPanel.classList.add('hidden');
+    checkboxes.forEach(checkbox => {
+        checkbox.checked = false;
+    });
+});
+
+// Responsive charts
+window.addEventListener('resize', function() {
+    stockLevelChart.resize();
+    usageTrendsChart.resize();
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Military Inventory System - Personnel Management</title>
+    <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#1a56db',
+                        secondary: '#475569'
+                    },
+                    borderRadius: {
+                        'none': '0px',
+                        'sm': '8px',
+                        DEFAULT: '12px',
+                        'md': '16px',
+                        'lg': '20px',
+                        'xl': '24px',
+                        '2xl': '28px',
+                        '3xl': '32px',
+                        'full': '9999px',
+                        'button': '12px'
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.5.0/echarts.min.js"></script>
+    <style>
+        :where([class^="ri-"])::before { content: "\f3c2"; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+        .custom-checkbox {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #cbd5e1;
+            border-radius: 4px;
+            outline: none;
+            cursor: pointer;
+            position: relative;
+        }
+        .custom-checkbox:checked {
+            background-color: #1a56db;
+            border-color: #1a56db;
+        }
+        .custom-checkbox:checked::after {
+            content: '';
+            position: absolute;
+            top: 3px;
+            left: 6px;
+            width: 6px;
+            height: 10px;
+            border: solid white;
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg);
+        }
+        .search-input:focus {
+            outline: none;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="min-h-screen flex flex-col">
+    <!-- Header Section -->
+    <header class="bg-white shadow-sm">
+            <div class="flex items-center justify-between px-6 py-4">
+                <div class="flex items-center space-x-2">
+                    <div class="w-10 h-10 flex items-center justify-center bg-primary rounded-full">
+                        <i class="ri-shield-line text-white ri-lg"></i>
+                    </div>
+                    <h1 class="ml-2 text-2xl font-['Pacifico'] text-gray-800">logo</h1>
+                </div>
+                <div class="flex items-center space-x-6">
+                        <div class="relative">
+                        <div class="absolute inset-y-0 left-0 flex items-center pl-3">
+                            <i class="ri-search-line text-gray-400"></i>
+                        </div>
+                        <input type="text" class="search-input pl-10 pr-4 py-2 w-64 bg-gray-50 border-none rounded-full text-sm" placeholder="Search personnel...">
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <div class="w-8 h-8 flex items-center justify-center text-gray-600 hover:text-primary">
+                            <i class="ri-notification-3-line ri-lg"></i>
+                        </div>
+                        <div class="w-8 h-8 flex items-center justify-center text-gray-600 hover:text-primary">
+                            <i class="ri-settings-3-line ri-lg"></i>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <div class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
+                                <i class="ri-user-line text-gray-600"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm font-medium text-gray-800">Col. James Wilson</p>
+                                <p class="text-xs text-gray-500">Administrator</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <nav class="flex px-6 py-2 border-t border-gray-100">
+                <ul class="flex space-x-8">
+                    <li><a href="index.html" class="text-gray-600 hover:text-gray-900 py-2">Dashboard</a></li>
+                    <li><a href="Inventory.html" class="text-gray-600 hover:text-gray-900 py-2">Inventory</a></li>
+                    <li><a href="Ammunition.html" class="text-gray-600 hover:text-gray-900 py-2">Ammunition</a></li>
+                    <li><a href="Vehicles.html" class="text-gray-600 hover:text-gray-900 py-2">Vehicles</a></li>
+                    <li><a href="Weapons.html" class="text-gray-600 hover:text-gray-900 py-2">Weapons</a></li>
+                    <li><a href="personnel.html" class="text-primary font-medium py-2 border-b-2 border-primary">Personnel</a></li>
+                    <li><a href="Reports.html" class="text-gray-600 hover:text-gray-900 py-2">Reports</a></li>
+                </ul>
+            </nav>
+    </header>
+
+    <!-- Main Content -->
+        <main class="flex-1 p-6">
+        <!-- Page Title & Controls -->
+            <div class="mb-6 flex items-center justify-between">
+            <div>
+                    <h2 class="text-2xl font-bold text-gray-800">Personnel Management</h2>
+                    <p class="text-gray-500">Manage and monitor military personnel information and activities</p>
+            </div>
+                <div class="flex items-center space-x-3">
+                    <span class="text-sm text-gray-500">Last updated: April 9, 2025 - 08:45 AM</span>
+                    <button class="flex items-center space-x-1 bg-white border border-gray-200 px-3 py-2 rounded-button text-sm text-gray-600 hover:bg-gray-50 whitespace-nowrap">
+                        <i class="ri-refresh-line mr-1"></i>
+                        <span>Refresh</span>
+                </button>
+                    <button class="flex items-center space-x-1 bg-primary px-3 py-2 rounded-button text-sm text-white hover:bg-primary/90 whitespace-nowrap">
+                        <i class="ri-user-add-line mr-1"></i>
+                        <span>Add Personnel</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Personnel Statistics Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+            <div class="bg-white rounded-lg shadow-sm p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-500">Total Personnel</p>
+                        <p class="mt-2 text-3xl font-bold text-gray-900">1,234</p>
+                        <p class="mt-1 text-sm text-green-600">+12% from last month</p>
+                    </div>
+                    <div class="bg-blue-50 p-3 rounded-full">
+                        <i class="ri-team-line text-2xl text-primary"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-lg shadow-sm p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-500">Active Duty</p>
+                        <p class="mt-2 text-3xl font-bold text-gray-900">987</p>
+                        <p class="mt-1 text-sm text-green-600">+5% from last month</p>
+                    </div>
+                    <div class="bg-green-50 p-3 rounded-full">
+                        <i class="ri-user-star-line text-2xl text-green-600"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-lg shadow-sm p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-500">On Leave</p>
+                        <p class="mt-2 text-3xl font-bold text-gray-900">156</p>
+                        <p class="mt-1 text-sm text-red-600">+3% from last month</p>
+                    </div>
+                    <div class="bg-yellow-50 p-3 rounded-full">
+                        <i class="ri-user-heart-line text-2xl text-yellow-600"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-lg shadow-sm p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-500">In Training</p>
+                        <p class="mt-2 text-3xl font-bold text-gray-900">91</p>
+                        <p class="mt-1 text-sm text-green-600">+8% from last month</p>
+                    </div>
+                    <div class="bg-purple-50 p-3 rounded-full">
+                        <i class="ri-user-settings-line text-2xl text-purple-600"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Personnel List Section -->
+            <div class="bg-white rounded-lg shadow-sm mb-6">
+            <div class="p-6 border-b border-gray-200">
+                <div class="flex justify-between items-center">
+                    <div class="flex space-x-4">
+                        <div class="relative">
+                                <div class="absolute inset-y-0 left-0 flex items-center pl-3">
+                                    <i class="ri-search-line text-gray-400"></i>
+                                </div>
+                                <input type="text" class="pl-10 pr-4 py-2 w-64 border border-gray-200 rounded-lg text-sm" placeholder="Search personnel...">
+                        </div>
+                            <div class="relative">
+                                <select class="pl-4 pr-8 py-2 border border-gray-200 rounded-lg text-sm text-gray-700 bg-white appearance-none">
+                            <option>All Divisions</option>
+                            <option>Infantry</option>
+                            <option>Armor</option>
+                            <option>Artillery</option>
+                        </select>
+                                <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                    <i class="ri-arrow-down-s-line text-gray-400"></i>
+                                </div>
+                            </div>
+                            <div class="relative">
+                                <select class="pl-4 pr-8 py-2 border border-gray-200 rounded-lg text-sm text-gray-700 bg-white appearance-none">
+                            <option>All Status</option>
+                            <option>Active</option>
+                            <option>On Leave</option>
+                            <option>In Training</option>
+                        </select>
+                                <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                    <i class="ri-arrow-down-s-line text-gray-400"></i>
+                                </div>
+                            </div>
+                    </div>
+                    <div class="flex space-x-3">
+                            <button class="flex items-center space-x-1 bg-white border border-gray-200 px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-50">
+                                <i class="ri-download-line mr-1"></i>
+                                <span>Export</span>
+                        </button>
+                            <button class="flex items-center space-x-1 bg-white border border-gray-200 px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-50">
+                                <i class="ri-printer-line mr-1"></i>
+                                <span>Print</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <input type="checkbox" class="custom-checkbox">
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Name/Rank
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Division
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Status
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Access Level
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Last Activity
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Actions
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        <!-- Sample row -->
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <input type="checkbox" class="custom-checkbox">
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="flex items-center">
+                                    <div class="flex-shrink-0 h-10 w-10">
+                                            <div class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
+                                                <i class="ri-user-line text-gray-600"></i>
+                                            </div>
+                                    </div>
+                                    <div class="ml-4">
+                                        <div class="text-sm font-medium text-gray-900">John Smith</div>
+                                        <div class="text-sm text-gray-500">Captain</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">Infantry</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                    Active
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                Level 3
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                2 hours ago
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                <button class="text-primary hover:text-blue-700 mr-3">
+                                    <i class="ri-eye-line"></i>
+                                </button>
+                                <button class="text-gray-600 hover:text-gray-900 mr-3">
+                                    <i class="ri-edit-line"></i>
+                                </button>
+                                <button class="text-red-600 hover:text-red-900">
+                                    <i class="ri-delete-bin-line"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        <!-- Add more rows as needed -->
+                    </tbody>
+                </table>
+            </div>
+            <div class="px-6 py-4 border-t border-gray-200">
+                <div class="flex items-center justify-between">
+                    <div class="flex-1 flex justify-between sm:hidden">
+                        <button class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                            Previous
+                        </button>
+                        <button class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                            Next
+                        </button>
+                    </div>
+                    <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                        <div>
+                            <p class="text-sm text-gray-700">
+                                Showing <span class="font-medium">1</span> to <span class="font-medium">10</span> of <span class="font-medium">97</span> results
+                            </p>
+                        </div>
+                        <div>
+                            <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                                <button class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                                    <i class="ri-arrow-left-s-line"></i>
+                                </button>
+                                <button class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
+                                    1
+                                </button>
+                                <button class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
+                                    2
+                                </button>
+                                <button class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
+                                    3
+                                </button>
+                                <button class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                                    <i class="ri-arrow-right-s-line"></i>
+                                </button>
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Personnel Status Overview -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            <div class="bg-white rounded-lg shadow-sm p-6">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Deployment Status</h3>
+                <div id="deploymentChart" class="h-64"></div>
+            </div>
+            <div class="bg-white rounded-lg shadow-sm p-6">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Division Distribution</h3>
+                <div id="divisionChart" class="h-64"></div>
+            </div>
+        </div>
+
+        <!-- Quick Access Features -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="bg-white rounded-lg shadow-sm p-6">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Personnel Alerts</h3>
+                <div class="space-y-4">
+                    <div class="flex items-start">
+                        <div class="flex-shrink-0">
+                            <span class="h-2 w-2 rounded-full bg-red-500"></span>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm font-medium text-gray-900">Security Clearance Expiring</p>
+                            <p class="text-sm text-gray-500">5 personnel have security clearances expiring in 30 days</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start">
+                        <div class="flex-shrink-0">
+                            <span class="h-2 w-2 rounded-full bg-yellow-500"></span>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm font-medium text-gray-900">Training Required</p>
+                            <p class="text-sm text-gray-500">12 personnel need to complete mandatory training</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-lg shadow-sm p-6">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Upcoming Certifications</h3>
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-900">Advanced Combat Training</p>
+                            <p class="text-sm text-gray-500">Due in 5 days</p>
+                        </div>
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                            8 pending
+                        </span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-900">First Aid Certification</p>
+                            <p class="text-sm text-gray-500">Due in 12 days</p>
+                        </div>
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                            15 pending
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-lg shadow-sm p-6">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Recent Activities</h3>
+                <div class="space-y-4">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                                <div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
+                                    <i class="ri-user-line text-gray-600"></i>
+                                </div>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm text-gray-900">John Smith completed Advanced Marksmanship Training</p>
+                            <p class="text-sm text-gray-500">2 hours ago</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                                <div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
+                                    <i class="ri-user-line text-gray-600"></i>
+                                </div>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm text-gray-900">Sarah Johnson was assigned to Alpha Team</p>
+                            <p class="text-sm text-gray-500">4 hours ago</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    </div>
+
+    <script>
+        // Initialize charts
+        document.addEventListener('DOMContentLoaded', function() {
+            // Deployment Status Chart
+            const deploymentChart = echarts.init(document.getElementById('deploymentChart'));
+            deploymentChart.setOption({
+                tooltip: {
+                    trigger: 'item'
+                },
+                legend: {
+                    orient: 'vertical',
+                    left: 'left'
+                },
+                series: [{
+                    name: 'Deployment Status',
+                    type: 'pie',
+                    radius: '50%',
+                    data: [
+                        { value: 735, name: 'Deployed' },
+                        { value: 580, name: 'On Base' },
+                        { value: 484, name: 'On Leave' },
+                        { value: 300, name: 'In Training' }
+                    ],
+                    emphasis: {
+                        itemStyle: {
+                            shadowBlur: 10,
+                            shadowOffsetX: 0,
+                            shadowColor: 'rgba(0, 0, 0, 0.5)'
+                        }
+                    }
+                }]
+            });
+
+            // Division Distribution Chart
+            const divisionChart = echarts.init(document.getElementById('divisionChart'));
+            divisionChart.setOption({
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: {
+                        type: 'shadow'
+                    }
+                },
+                grid: {
+                    left: '3%',
+                    right: '4%',
+                    bottom: '3%',
+                    containLabel: true
+                },
+                xAxis: {
+                    type: 'value'
+                },
+                yAxis: {
+                    type: 'category',
+                    data: ['Infantry', 'Armor', 'Artillery', 'Support', 'Medical', 'Engineering']
+                },
+                series: [{
+                    name: 'Personnel',
+                    type: 'bar',
+                    data: [320, 302, 301, 334, 390, 330]
+                }]
+            });
+
+            // Handle window resize
+            window.addEventListener('resize', function() {
+                deploymentChart.resize();
+                divisionChart.resize();
+            });
+        });
+    </script>
+</body>
+</html>
